@@ -1,0 +1,115 @@
+{
+    "KeepAliveCapture": {
+        "desc": "虚拟屏保活取图模式：在 1280x720 虚拟屏拉起星铁并保持运行 10 分钟，不做自动点击干扰，方便手动切换界面并由 PC 端抓取 720P 标准截图",
+        "next": [
+            "KeepAliveLaunchApp"
+        ]
+    },
+    "KeepAliveLaunchApp": {
+        "desc": "拉起游戏进入 1280x720 虚拟屏",
+        "action": "StartApp",
+        "package": "com.miHoYo.hkrpg",
+        "post_delay": 3000,
+        "next": [
+            "KeepAliveStandbyWait"
+        ]
+    },
+    "KeepAliveStandbyWait": {
+        "desc": "保持虚拟屏运行 10 分钟（600,000ms），等待不可能出现的占位文本以维持虚拟屏会话而不触发点击",
+        "recognition": "OCR",
+        "roi": [
+            0,
+            0,
+            100,
+            40
+        ],
+        "expected": [
+            "__MAAHSR_STOP_CAPTURE_SENTINEL__"
+        ],
+        "rate_limit": 5000,
+        "timeout": 600000,
+        "action": "DoNothing"
+    },
+    "DailyLightRoutine": {
+        "desc": "轻量无战斗日常演示：进入大世界 -> 打开手机菜单 -> 点击委托 -> 一键领取奖励",
+        "next": [
+            "DailyClickDispatchMenu",
+            "[JumpBack]StartUp"
+        ]
+    },
+    "DailyClickDispatchMenu": {
+        "desc": "在手机菜单中识别并点击『委托』",
+        "recognition": "OCR",
+        "roi": [
+            600,
+            80,
+            660,
+            600
+        ],
+        "expected": [
+            "委托"
+        ],
+        "action": "Click",
+        "post_delay": 2500,
+        "next": [
+            "DailyClaimDispatchReward",
+            "DailyDispatchAlreadyRunning"
+        ]
+    },
+    "DailyClaimDispatchReward": {
+        "desc": "在委托界面识别并点击右下角『领取奖励』",
+        "recognition": "OCR",
+        "roi": [
+            700,
+            500,
+            560,
+            200
+        ],
+        "expected": [
+            "领取奖励",
+            "一键领取"
+        ],
+        "action": "Click",
+        "post_delay": 2000,
+        "next": [
+            "DailyCloseDispatchRewardPopup"
+        ]
+    },
+    "DailyCloseDispatchRewardPopup": {
+        "desc": "关闭委托奖励弹窗",
+        "recognition": "OCR",
+        "roi": [
+            350,
+            500,
+            580,
+            200
+        ],
+        "expected": [
+            "点击空白处关闭"
+        ],
+        "action": "Click",
+        "target": [
+            640,
+            660,
+            20,
+            20
+        ],
+        "post_delay": 1500
+    },
+    "DailyDispatchAlreadyRunning": {
+        "desc": "委托已在持续产出且暂无可领奖励，直接结束",
+        "recognition": "OCR",
+        "roi": [
+            600,
+            450,
+            660,
+            250
+        ],
+        "expected": [
+            "委托派遣中",
+            "持续获得奖励",
+            "专属材料"
+        ],
+        "action": "DoNothing"
+    }
+}

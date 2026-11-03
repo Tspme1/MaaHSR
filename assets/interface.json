@@ -1,0 +1,100 @@
+{
+    "interface_version": 2,
+    "languages": {
+        "zh_cn": "locales/zh_cn.json"
+    },
+    "name": "MaaHSR",
+    "label": "$app.label",
+    "title": "MaaHSR v0.1.0-demo",
+    "icon": "locales/icon.png",
+    "github": "https://github.com/MaaXYZ/MaaFramework",
+    "version": "v0.1.0",
+    "contact": "MaaHSR Android Automation Demo",
+    "license": "MIT",
+    "welcome": "欢迎使用 MaaHSR（崩坏：星穹铁道 Android 自动化助手 Demo）！\n\n请先确保已授权 Shizuku 并开启后台 720P 虚拟屏模式。",
+    "description": "基于 MaaFramework v5 与 MaaFwApp 打造的《崩坏：星穹铁道》Android 每日任务自动化工具。",
+    "controller": [
+        {
+            "name": "ADB",
+            "label": "$controller.adb.label",
+            "description": "$controller.adb.desc",
+            "type": "Adb",
+            "display_short_side": 720
+        }
+    ],
+    "resource": [
+        {
+            "name": "Official",
+            "label": "$resource.official.label",
+            "description": "国服官服 (com.miHoYo.hkrpg)",
+            "path": [
+                "./resource"
+            ]
+        },
+        {
+            "name": "Bilibili",
+            "label": "$resource.bilibili.label",
+            "description": "B站服 (com.miHoYo.hkrpg.bilibili)",
+            "path": [
+                "./resource",
+                "./resource_bilibili"
+            ]
+        }
+    ],
+    "task": [
+        {
+            "name": "StartUp",
+            "label": "$task.startup.label",
+            "entry": "StartUp",
+            "default_check": true,
+            "description": "$task.startup.desc",
+            "option": [
+                "ClientChannel"
+            ]
+        },
+        {
+            "name": "KeepAliveCapture",
+            "label": "$task.capture.label",
+            "entry": "KeepAliveCapture",
+            "default_check": false,
+            "description": "$task.capture.desc",
+            "option": [
+                "ClientChannel"
+            ]
+        },
+        {
+            "name": "DailyLightRoutine",
+            "label": "$task.daily_light.label",
+            "entry": "DailyLightRoutine",
+            "default_check": false,
+            "description": "$task.daily_light.desc"
+        }
+    ],
+    "option": {
+        "ClientChannel": {
+            "type": "select",
+            "label": "$option.channel.label",
+            "default_case": "Official",
+            "cases": [
+                {
+                    "name": "Official",
+                    "label": "$resource.official.label",
+                    "pipeline_override": {
+                        "StartUpApp": {
+                            "package": "com.miHoYo.hkrpg"
+                        }
+                    }
+                },
+                {
+                    "name": "Bilibili",
+                    "label": "$resource.bilibili.label",
+                    "pipeline_override": {
+                        "StartUpApp": {
+                            "package": "com.miHoYo.hkrpg.bilibili"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

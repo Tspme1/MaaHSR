@@ -1,0 +1,12 @@
+# Build & Cache
+*.zip
+Android/MaaFwApp/local.properties
+Android/MaaFwApp/.maa-cache/
+Android/MaaFwApp/app/src/main/jniLibs/
+Android/MaaFwApp/build/
+Android/MaaFwApp/app/build/
+Android/MaaFwApp/.gradle/
+assets/resource/model/ocr/*.onnx
+assets/resource/model/ocr/keys.txt
+debug/
+__pycache__/

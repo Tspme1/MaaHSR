@@ -1,0 +1,14 @@
+{
+    "app.label": "MaaHSR 星铁小助手",
+    "controller.adb.label": "Android 控制端 (ADB / 本机虚拟屏)",
+    "controller.adb.desc": "在 MaaFwApp 内由 Shizuku 720P 虚拟屏驱动，或在 PC 端通过 ADB 连接",
+    "resource.official.label": "国服官服",
+    "resource.bilibili.label": "B站服 (Bilibili)",
+    "task.startup.label": "1. 启动星铁并进入大世界 (纯OCR Demo)",
+    "task.startup.desc": "在 1280x720 虚拟屏中拉起《崩坏：星穹铁道》，通过纯 OCR 自动识别并点击登录、领取月卡，进入大世界后打开左上角手机菜单验证成功。",
+    "task.capture.label": "2. 虚拟屏保活取图模式 (辅助采集 720P 截图)",
+    "task.capture.desc": "拉起游戏并保持 1280x720 虚拟屏持续运行 10 分钟（不做自动点击干扰），供您在悬浮窗手动切换各个游戏页面，并配合电脑端 tools/capture_720p.py 一键抓取标准 720P 截图。",
+    "task.daily_light.label": "3. 轻量无战斗日常演示 (打开手机菜单->领取委托)",
+    "task.daily_light.desc": "演示纯 OCR 驱动的委托奖励一键领取流程（待采集截图后可升级为高精度模板匹配）。",
+    "option.channel.label": "游戏客户端渠道"
+}

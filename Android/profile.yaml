@@ -1,0 +1,23 @@
+# MaaHSR Android 打包配方（供 Android/MaaFwApp 使用）
+assets: ../assets
+
+include:
+  - interface.json
+  - resource/**
+  - resource_bilibili/**
+  - locales/**
+
+# 仅使用后台虚拟屏模式，固定为 1280x720 @ 240dpi (16:9)
+# 彻底解决不同 Android 真机屏幕长宽比（20:9 等）与挖孔刘海导致游戏 UI 偏移的问题
+display:
+  foreground: false
+  presets:
+    - label: 720P
+      width: 1280
+      height: 720
+      dpi: 240
+
+app:
+  id: maahsr
+  label: MaaHSR
+  icon: ../assets/locales/icon.png
