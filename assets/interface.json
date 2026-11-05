@@ -5,12 +5,12 @@
     },
     "name": "MaaHSR",
     "label": "$app.label",
-    "title": "MaaHSR v0.1.0-demo",
+    "title": "MaaHSR v0.0.1",
     "icon": "locales/icon.png",
-    "github": "https://github.com/MaaXYZ/MaaFramework",
-    "version": "v0.1.0",
+    "github": "https://github.com/Tspme1/MaaHSR",
+    "version": "v0.0.1",
     "contact": "MaaHSR Android Automation Demo",
-    "license": "MIT",
+    "license": "MIT License\n\nCopyright (c) 2026 Tspme1 (MaaHSR Contributors)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n---\n致谢 (Acknowledgements):\n感谢 MaaAssistantArknights (MAA)、MaaFramework 与 MaaFwApp 开源项目。",
     "welcome": "欢迎使用 MaaHSR（崩坏：星穹铁道 Android 自动化助手 Demo）！\n\n请先确保已授权 Shizuku 并开启后台 720P 虚拟屏模式。",
     "description": "基于 MaaFramework v5 与 MaaFwApp 打造的《崩坏：星穹铁道》Android 每日任务自动化工具。",
     "controller": [
@@ -53,6 +53,59 @@
             ]
         },
         {
+            "name": "Assignments",
+            "label": "$task.assignments.label",
+            "entry": "Assignments",
+            "default_check": true,
+            "description": "$task.assignments.desc",
+            "option": [
+                "AssignmentAction"
+            ]
+        },
+        {
+            "name": "Mail",
+            "label": "$task.mail.label",
+            "entry": "Mail",
+            "default_check": true,
+            "description": "$task.mail.desc",
+            "option": [
+                "MailAction"
+            ]
+        },
+        {
+            "name": "TrailblazePower",
+            "label": "$task.trailblaze_power.label",
+            "entry": "TrailblazePower",
+            "default_check": true,
+            "description": "$task.trailblaze_power.desc",
+            "option": [
+                "TrailblazeTarget",
+                "ChallengeCount",
+                "UseSupport",
+                "UseFuelVoucher"
+            ]
+        },
+        {
+            "name": "DailyTraining",
+            "label": "$task.daily_training.label",
+            "entry": "DailyTraining",
+            "default_check": true,
+            "description": "$task.daily_training.desc",
+            "option": [
+                "DailyTrainingAction"
+            ]
+        },
+        {
+            "name": "NamelessHonor",
+            "label": "$task.nameless_honor.label",
+            "entry": "NamelessHonor",
+            "default_check": true,
+            "description": "$task.nameless_honor.desc",
+            "option": [
+                "NamelessHonorAction"
+            ]
+        },
+        {
             "name": "KeepAliveCapture",
             "label": "$task.capture.label",
             "entry": "KeepAliveCapture",
@@ -61,13 +114,6 @@
             "option": [
                 "ClientChannel"
             ]
-        },
-        {
-            "name": "DailyLightRoutine",
-            "label": "$task.daily_light.label",
-            "entry": "DailyLightRoutine",
-            "default_check": false,
-            "description": "$task.daily_light.desc"
         }
     ],
     "option": {
@@ -80,7 +126,10 @@
                     "name": "Official",
                     "label": "$resource.official.label",
                     "pipeline_override": {
-                        "StartUpApp": {
+                        "StartUp": {
+                            "package": "com.miHoYo.hkrpg"
+                        },
+                        "KeepAliveLaunchApp": {
                             "package": "com.miHoYo.hkrpg"
                         }
                     }
@@ -89,12 +138,519 @@
                     "name": "Bilibili",
                     "label": "$resource.bilibili.label",
                     "pipeline_override": {
-                        "StartUpApp": {
+                        "StartUp": {
+                            "package": "com.miHoYo.hkrpg.bilibili"
+                        },
+                        "KeepAliveLaunchApp": {
                             "package": "com.miHoYo.hkrpg.bilibili"
                         }
                     }
                 }
             ]
+        },
+        "TrailblazeTarget": {
+            "type": "select",
+            "label": "$option.trailblaze_target.label",
+            "default_case": "BuildTargetOrnament",
+            "cases": [
+                {
+                    "name": "BuildTargetOrnament",
+                    "label": "培养目标 - 推荐位面饰品（内圈）",
+                    "pipeline_override": {
+                        "PowerSelectCategory": {
+                            "recognition": "OCR",
+                            "expected": [
+                                "饰品提取",
+                                "位面饰品"
+                            ],
+                            "roi": [
+                                105,
+                                220,
+                                330,
+                                460
+                            ],
+                            "action": "Click",
+                            "post_delay": 800,
+                            "next": [
+                                "PowerClickEnterStage"
+                            ]
+                        },
+                        "PowerClickEnterStage": {
+                            "roi": [
+                                985,
+                                295,
+                                190,
+                                75
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "BuildTargetRelic",
+                    "label": "培养目标 - 推荐隧洞遗器（外圈）",
+                    "pipeline_override": {
+                        "PowerSelectCategory": {
+                            "recognition": "DirectHit",
+                            "action": "Swipe",
+                            "begin": [
+                                270,
+                                580
+                            ],
+                            "end": [
+                                270,
+                                240
+                            ],
+                            "duration": 450,
+                            "post_delay": 700,
+                            "next": [
+                                "PowerClickCavernTab"
+                            ]
+                        },
+                        "PowerClickEnterStage": {
+                            "roi": [
+                                985,
+                                195,
+                                190,
+                                75
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "CalyxGolden",
+                    "label": "拟造花萼（金）- 经验/信用点",
+                    "option": [
+                        "CalyxGoldenStage"
+                    ],
+                    "pipeline_override": {
+                        "PowerSelectCategory": {
+                            "recognition": "OCR",
+                            "expected": [
+                                "经验材料",
+                                "信用点",
+                                "拟造花萼（金）",
+                                "拟造花萼(金)"
+                            ],
+                            "roi": [
+                                105,
+                                220,
+                                330,
+                                460
+                            ],
+                            "action": "Click",
+                            "post_delay": 700,
+                            "next": [
+                                "PowerClickEnterStage"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "CalyxCrimson",
+                    "label": "拟造花萼（赤）- 行迹材料",
+                    "pipeline_override": {
+                        "PowerSelectCategory": {
+                            "recognition": "OCR",
+                            "expected": [
+                                "行迹材料",
+                                "拟造花萼（赤）",
+                                "拟造花萼(赤)"
+                            ],
+                            "roi": [
+                                105,
+                                220,
+                                330,
+                                460
+                            ],
+                            "action": "Click",
+                            "post_delay": 700,
+                            "next": [
+                                "PowerClickEnterStage"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "StagnantShadow",
+                    "label": "凝滞虚影 - 角色晋阶材料",
+                    "pipeline_override": {
+                        "PowerSelectCategory": {
+                            "recognition": "DirectHit",
+                            "action": "Swipe",
+                            "begin": [
+                                270,
+                                580
+                            ],
+                            "end": [
+                                270,
+                                240
+                            ],
+                            "duration": 450,
+                            "post_delay": 700,
+                            "next": [
+                                "PowerClickStagnantTab"
+                            ]
+                        },
+                        "PowerClickEnterStage": {
+                            "roi": [
+                                985,
+                                195,
+                                190,
+                                75
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "EchoOfWar",
+                    "label": "历战余响 - 周本高阶材料",
+                    "pipeline_override": {
+                        "PowerSelectCategory": {
+                            "recognition": "DirectHit",
+                            "action": "Swipe",
+                            "begin": [
+                                270,
+                                580
+                            ],
+                            "end": [
+                                270,
+                                240
+                            ],
+                            "duration": 450,
+                            "post_delay": 700,
+                            "next": [
+                                "PowerClickEchoTab"
+                            ]
+                        },
+                        "PowerClickEnterStage": {
+                            "roi": [
+                                985,
+                                195,
+                                190,
+                                75
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "ChallengeCount": {
+            "type": "select",
+            "label": "$option.challenge_count.label",
+            "default_case": "Count1",
+            "cases": [
+                {
+                    "name": "Count1",
+                    "label": "1 次",
+                    "pipeline_override": {
+                        "PowerAddChallengeCount": {
+                            "max_hit": 0
+                        }
+                    }
+                },
+                {
+                    "name": "Count2",
+                    "label": "2 次",
+                    "pipeline_override": {
+                        "PowerAddChallengeCount": {
+                            "max_hit": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Count3",
+                    "label": "3 次",
+                    "pipeline_override": {
+                        "PowerAddChallengeCount": {
+                            "max_hit": 2
+                        }
+                    }
+                },
+                {
+                    "name": "Count4",
+                    "label": "4 次",
+                    "pipeline_override": {
+                        "PowerAddChallengeCount": {
+                            "max_hit": 3
+                        }
+                    }
+                },
+                {
+                    "name": "Count6",
+                    "label": "6 次",
+                    "pipeline_override": {
+                        "PowerAddChallengeCount": {
+                            "max_hit": 5
+                        }
+                    }
+                },
+                {
+                    "name": "CountMax",
+                    "label": "最大次数",
+                    "pipeline_override": {
+                        "PowerAddChallengeCount": {
+                            "max_hit": 23
+                        }
+                    }
+                },
+                {
+                    "name": "CustomCount",
+                    "label": "自定义刷取次数",
+                    "option": [
+                        "CustomChallengeCountInput"
+                    ],
+                    "pipeline_override": {}
+                }
+            ]
+        },
+        "UseSupport": {
+            "type": "select",
+            "label": "$option.use_support.label",
+            "default_case": "NoSupport",
+            "cases": [
+                {
+                    "name": "NoSupport",
+                    "label": "不使用支援角色",
+                    "pipeline_override": {
+                        "PowerStageReady": {
+                            "next": [
+                                "PowerClickStartChallenge"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "UseFirstFriendSupport",
+                    "label": "使用好友第一位支援角色",
+                    "pipeline_override": {
+                        "PowerStageReady": {
+                            "next": [
+                                "PowerClickSupportBtn",
+                                "PowerClickStartChallenge"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "UseFuelVoucher": {
+            "type": "select",
+            "label": "$option.use_fuel_voucher.label",
+            "default_case": "NoVoucher",
+            "cases": [
+                {
+                    "name": "NoVoucher",
+                    "label": "不使用助燃券",
+                    "pipeline_override": {
+                        "PowerQuickBattleClick": {
+                            "max_hit": 0
+                        }
+                    }
+                },
+                {
+                    "name": "UseVoucher",
+                    "label": "优先使用助燃券快速刷取",
+                    "pipeline_override": {
+                        "PowerQuickBattleClick": {
+                            "max_hit": 1
+                        }
+                    }
+                }
+            ]
+        },
+        "CalyxGoldenStage": {
+            "type": "select",
+            "label": "$option.calyx_golden_stage.label",
+            "default_case": "Memories",
+            "cases": [
+                {
+                    "name": "Memories",
+                    "label": "回忆之蕾 - 角色经验材料",
+                    "pipeline_override": {
+                        "PowerClickEnterStage": {
+                            "roi": [
+                                985,
+                                240,
+                                190,
+                                100
+                            ],
+                            "order_by": "Vertical",
+                            "index": 0
+                        }
+                    }
+                },
+                {
+                    "name": "Aether",
+                    "label": "以太之蕾 - 光锥经验材料",
+                    "pipeline_override": {
+                        "PowerClickEnterStage": {
+                            "roi": [
+                                985,
+                                340,
+                                190,
+                                95
+                            ],
+                            "order_by": "Vertical",
+                            "index": 0
+                        }
+                    }
+                },
+                {
+                    "name": "Treasures",
+                    "label": "藏珍之蕾 - 信用点",
+                    "pipeline_override": {
+                        "PowerClickEnterStage": {
+                            "roi": [
+                                985,
+                                440,
+                                190,
+                                95
+                            ],
+                            "order_by": "Vertical",
+                            "index": 0
+                        }
+                    }
+                }
+            ]
+        },
+        "CustomChallengeCountInput": {
+            "type": "input",
+            "label": "$option.custom_count_input.label",
+            "inputs": [
+                {
+                    "name": "custom_count",
+                    "label": "$option.custom_count_field.label",
+                    "default": "6",
+                    "pipeline_type": "int",
+                    "verify": "^[1-9][0-9]*$",
+                    "pattern_msg": "$option.custom_count_pattern.msg"
+                }
+            ],
+            "pipeline_override": {
+                "PowerAddChallengeCount": {
+                    "max_hit": "{custom_count}"
+                }
+            }
+        },
+        "AssignmentAction": {
+            "type": "select",
+            "label": "$option.assignment_action.label",
+            "default_case": "ClaimAndRedispatch",
+            "cases": [
+                {
+                    "name": "ClaimAndRedispatch",
+                    "label": "一键领取并再次派遣",
+                    "pipeline_override": {}
+                },
+                {
+                    "name": "ClaimOnly",
+                    "label": "仅领取委托奖励",
+                    "pipeline_override": {
+                        "AssignmentClickOneKeyClaim": {
+                            "next": [
+                                "AssignmentDismissReward",
+                                "AssignmentDoneClose"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "MailAction": {
+            "type": "select",
+            "label": "$option.mail_action.label",
+            "default_case": "ClaimAll",
+            "cases": [
+                {
+                    "name": "ClaimAll",
+                    "label": "一键领取全部附件邮件",
+                    "pipeline_override": {}
+                }
+            ]
+        },
+        "DailyTrainingAction": {
+            "type": "select",
+            "label": "$option.daily_training_action.label",
+            "default_case": "ClaimAll",
+            "cases": [
+                {
+                    "name": "ClaimAll",
+                    "label": "领取任务活跃度与全部档位奖励",
+                    "pipeline_override": {}
+                },
+                {
+                    "name": "ClaimNodesOnly",
+                    "label": "仅领取顶部活跃度进度奖励",
+                    "pipeline_override": {
+                        "DailyAlreadyOpen": {
+                            "next": [
+                                "DailyCheckAlreadyFull",
+                                "DailyClaimProgressNodes"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "NamelessHonorAction": {
+            "type": "select",
+            "label": "$option.nameless_honor_action.label",
+            "default_case": "ClaimQuestsAndRewards",
+            "cases": [
+                {
+                    "name": "ClaimQuestsAndRewards",
+                    "label": "领取任务经验与勋礼等级奖励",
+                    "pipeline_override": {}
+                },
+                {
+                    "name": "ClaimRewardsOnly",
+                    "label": "仅领取勋礼等级奖励",
+                    "pipeline_override": {
+                        "HonorAlreadyOpen": {
+                            "next": [
+                                "HonorSwitchToRewardTab"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
-    }
+    },
+    "preset": [
+        {
+            "name": "DailyDefault",
+            "label": "日常一条龙",
+            "description": "默认包含启动游戏、每日委托、邮件领取、消耗开拓力、每日实训与无名勋礼",
+            "task": [
+                {
+                    "name": "StartUp",
+                    "enabled": true
+                },
+                {
+                    "name": "Assignments",
+                    "enabled": true
+                },
+                {
+                    "name": "Mail",
+                    "enabled": true
+                },
+                {
+                    "name": "TrailblazePower",
+                    "enabled": true
+                },
+                {
+                    "name": "DailyTraining",
+                    "enabled": true
+                },
+                {
+                    "name": "NamelessHonor",
+                    "enabled": true
+                },
+                {
+                    "name": "KeepAliveCapture",
+                    "enabled": false
+                }
+            ]
+        }
+    ]
 }

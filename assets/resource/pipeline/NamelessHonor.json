@@ -1,0 +1,270 @@
+{
+    "NamelessHonor": {
+        "desc": "无名勋礼一键领取任务经验与等级奖励",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "HonorAlreadyOpen",
+            "HonorOpenFromHud",
+            "HonorOpenPhone",
+            "HonorFromPhone"
+        ]
+    },
+    "HonorOpenFromHud": {
+        "desc": "在大世界点击右上角无名勋礼图标",
+        "recognition": "TemplateMatch",
+        "template": "hud_honor.png",
+        "roi": [
+            840,
+            10,
+            75,
+            75
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            876,
+            44
+        ],
+        "post_delay": 900,
+        "next": [
+            "HonorAlreadyOpen"
+        ]
+    },
+    "HonorOpenPhone": {
+        "desc": "在大世界点击左上角手机图标",
+        "recognition": "TemplateMatch",
+        "template": "hud_phone.png",
+        "roi": [
+            5,
+            25,
+            65,
+            70
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            30,
+            60
+        ],
+        "post_delay": 800,
+        "next": [
+            "HonorFromPhone"
+        ]
+    },
+    "HonorFromPhone": {
+        "desc": "从手机菜单点击无名勋礼磁贴",
+        "recognition": "OCR",
+        "expected": [
+            "无名勋礼"
+        ],
+        "roi": [
+            850,
+            470,
+            120,
+            115
+        ],
+        "action": "Click",
+        "target": [
+            910,
+            525
+        ],
+        "post_delay": 900,
+        "next": [
+            "HonorAlreadyOpen"
+        ]
+    },
+    "HonorAlreadyOpen": {
+        "desc": "确认已在无名勋礼界面",
+        "recognition": "OCR",
+        "expected": [
+            "无名勋礼"
+        ],
+        "roi": [
+            20,
+            10,
+            220,
+            70
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "HonorSwitchToQuestTab"
+        ]
+    },
+    "HonorSwitchToQuestTab": {
+        "desc": "点击左侧任务标签",
+        "action": "Click",
+        "target": [
+            46,
+            208
+        ],
+        "post_delay": 700,
+        "next": [
+            "HonorClaimQuests",
+            "HonorSwitchToRewardTab"
+        ]
+    },
+    "HonorClaimQuests": {
+        "desc": "点击任务一键领取",
+        "recognition": "OCR",
+        "expected": [
+            "一键领取",
+            "领取"
+        ],
+        "roi": [
+            750,
+            580,
+            490,
+            125
+        ],
+        "action": "Click",
+        "post_delay": 800,
+        "focus": {
+            "Node.Recognition.Succeeded": "已领取无名勋礼任务经验"
+        },
+        "next": [
+            "HonorDismissPopup",
+            "HonorSwitchToRewardTab"
+        ]
+    },
+    "HonorDismissPopup": {
+        "desc": "关闭经验等级弹窗",
+        "recognition": "OCR",
+        "expected": [
+            "点击空白处关闭",
+            "获得物品",
+            "等级提升"
+        ],
+        "roi": [
+            400,
+            100,
+            480,
+            600
+        ],
+        "action": "Click",
+        "target": [
+            640,
+            680
+        ],
+        "post_delay": 600,
+        "next": [
+            "HonorSwitchToRewardTab"
+        ]
+    },
+    "HonorSwitchToRewardTab": {
+        "desc": "点击左侧奖励标签",
+        "action": "Click",
+        "target": [
+            46,
+            122
+        ],
+        "post_delay": 700,
+        "next": [
+            "HonorClaimRewards",
+            "HonorClaimRewardsTemplate",
+            "HonorDoneClose"
+        ]
+    },
+    "HonorClaimRewards": {
+        "desc": "点击奖励一键领取（兼容未解锁荣勋时位于左侧 [788,646,166,46] 与右侧两种位置）",
+        "recognition": "OCR",
+        "expected": [
+            "一键领取"
+        ],
+        "roi": [
+            750,
+            620,
+            490,
+            90
+        ],
+        "action": "Click",
+        "post_delay": 800,
+        "focus": {
+            "Node.Recognition.Succeeded": "已领取无名勋礼等级奖励"
+        },
+        "next": [
+            "HonorDismissRewardPopup",
+            "HonorDoneClose"
+        ]
+    },
+    "HonorClaimRewardsTemplate": {
+        "desc": "通过模板匹配点击无名勋礼奖励一键领取按钮",
+        "recognition": "TemplateMatch",
+        "template": "honor_reward_claim_all.png",
+        "roi": [
+            750,
+            620,
+            490,
+            90
+        ],
+        "threshold": 0.75,
+        "action": "Click",
+        "post_delay": 800,
+        "focus": {
+            "Node.Recognition.Succeeded": "已领取无名勋礼等级奖励"
+        },
+        "next": [
+            "HonorDismissRewardPopup",
+            "HonorDoneClose"
+        ]
+    },
+    "HonorDismissRewardPopup": {
+        "desc": "关闭无名勋礼奖励弹窗",
+        "recognition": "OCR",
+        "expected": [
+            "点击空白处关闭",
+            "获得物品"
+        ],
+        "roi": [
+            400,
+            100,
+            480,
+            600
+        ],
+        "action": "Click",
+        "target": [
+            640,
+            680
+        ],
+        "post_delay": 600,
+        "next": [
+            "HonorDoneClose"
+        ]
+    },
+    "HonorDoneClose": {
+        "desc": "关闭无名勋礼界面",
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "HonorExitPhone",
+            "CheckMainWorld"
+        ]
+    },
+    "HonorExitPhone": {
+        "desc": "关闭手机菜单退回大世界",
+        "recognition": "TemplateMatch",
+        "template": "phone_close.png",
+        "roi": [
+            1190,
+            5,
+            85,
+            80
+        ],
+        "threshold": 0.72,
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "CheckMainWorld"
+        ]
+    }
+}

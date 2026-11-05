@@ -1,186 +1,193 @@
 {
     "StartUp": {
-        "desc": "启动星穹铁道并进入大世界入口",
-        "next": [
-            "InPhoneMenuDetected",
-            "StartUpApp"
-        ]
-    },
-    "StartUpApp": {
-        "desc": "调用 StartApp 启动崩坏：星穹铁道（默认官服，可由选项或 B 服资源覆盖）",
+        "desc": "启动崩坏：星穹铁道并进入大世界",
         "action": "StartApp",
         "package": "com.miHoYo.hkrpg",
-        "post_delay": 5000,
+        "post_delay": 3000,
         "next": [
-            "StartUpLoop"
+            "CheckMainWorld",
+            "LoginClickEnter",
+            "ClaimMonthlyCardPopup",
+            "StartupWaitLoading"
         ]
-    },
-    "StartUpLoop": {
-        "desc": "循环检测登录页、更新弹窗、月卡弹窗或大世界状态",
-        "timeout": 180000,
-        "next": [
-            "InPhoneMenuDetected",
-            "[JumpBack]LoginUpdateConfirm",
-            "[JumpBack]BilibiliLoginClick",
-            "[JumpBack]LoginClickEnter",
-            "[JumpBack]LoginStartGameButton",
-            "[JumpBack]ClaimExpressSupplyPass",
-            "[JumpBack]CloseCommonPopup",
-            "[JumpBack]ProbeOpenPhoneMenu"
-        ]
-    },
-    "LoginUpdateConfirm": {
-        "desc": "资源下载或更新确认弹窗",
-        "recognition": "OCR",
-        "roi": [
-            350,
-            300,
-            580,
-            320
-        ],
-        "expected": [
-            "确认",
-            "确定",
-            "开始下载"
-        ],
-        "action": "Click",
-        "post_delay": 2000
-    },
-    "BilibiliLoginClick": {
-        "desc": "B服或渠道登录框点击进入游戏",
-        "recognition": "OCR",
-        "roi": [
-            350,
-            250,
-            580,
-            380
-        ],
-        "expected": [
-            "进入游戏",
-            "登录"
-        ],
-        "action": "Click",
-        "post_delay": 3000
-    },
-    "LoginStartGameButton": {
-        "desc": "识别开始游戏文本并点击",
-        "recognition": "OCR",
-        "roi": [
-            400,
-            420,
-            480,
-            260
-        ],
-        "expected": [
-            "开始游戏"
-        ],
-        "action": "Click",
-        "post_delay": 3000
     },
     "LoginClickEnter": {
-        "desc": "星穹列车登录界面：点击进入",
+        "desc": "登录页点击进入游戏",
         "recognition": "OCR",
-        "roi": [
-            400,
-            450,
-            480,
-            250
-        ],
         "expected": [
-            "点击进入"
+            "点击进入",
+            "开始游戏",
+            "进入游戏"
+        ],
+        "roi": [
+            450,
+            520,
+            380,
+            180
         ],
         "action": "Click",
         "target": [
             640,
-            560,
-            20,
-            20
+            660
         ],
-        "post_delay": 5000
+        "post_delay": 3000,
+        "next": [
+            "CheckMainWorld",
+            "ClaimMonthlyCardPopup",
+            "LoginClickEnter",
+            "StartupWaitLoading"
+        ]
     },
-    "ClaimExpressSupplyPass": {
-        "desc": "领取列车补给凭证（小月卡）弹窗",
+    "ClaimMonthlyCardPopup": {
+        "desc": "识别并领取列车补给凭证（月卡）",
         "recognition": "OCR",
-        "roi": [
-            300,
-            100,
-            680,
-            580
-        ],
         "expected": [
             "列车补给凭证",
-            "今日到账",
-            "点击空白处关闭"
+            "今日补给"
         ],
-        "action": "Click",
-        "target": [
-            640,
-            650,
-            20,
-            20
-        ],
-        "post_delay": 2000
-    },
-    "CloseCommonPopup": {
-        "desc": "关闭通用『点击空白处关闭』浮层",
-        "recognition": "OCR",
         "roi": [
             400,
-            560,
+            100,
             480,
-            150
-        ],
-        "expected": [
-            "点击空白处关闭",
-            "点击任意位置关闭"
+            500
         ],
         "action": "Click",
         "target": [
             640,
-            660,
-            20,
-            20
+            640
         ],
-        "post_delay": 1500
+        "post_delay": 2000,
+        "next": [
+            "DismissMonthlyCardReward",
+            "CheckMainWorld"
+        ]
     },
-    "ProbeOpenPhoneMenu": {
-        "desc": "识别到左下角 UID（且未命中登录页文字）时，尝试点击左上角手机图标打开菜单以确认进入大世界",
+    "DismissMonthlyCardReward": {
+        "desc": "关闭月卡领取获得物品浮层",
         "recognition": "OCR",
-        "roi": [
-            0,
-            660,
-            280,
-            60
-        ],
         "expected": [
-            "UID"
+            "点击空白处关闭",
+            "获得物品"
+        ],
+        "roi": [
+            400,
+            100,
+            480,
+            580
         ],
         "action": "Click",
         "target": [
-            46,
-            42,
-            10,
-            10
+            640,
+            660
         ],
-        "post_delay": 2500
+        "post_delay": 1500,
+        "next": [
+            "CheckMainWorld",
+            "StartupWaitLoading"
+        ]
     },
-    "InPhoneMenuDetected": {
-        "desc": "识别到手机菜单中的『委托』『漫游签证』『合成』等文字，确认已成功进入大世界！",
-        "recognition": "OCR",
-        "roi": [
-            600,
-            80,
-            660,
-            600
+    "StartupWaitLoading": {
+        "desc": "等待加载中转",
+        "recognition": "DirectHit",
+        "action": "DoNothing",
+        "post_delay": 2000,
+        "next": [
+            "CheckMainWorld",
+            "LoginClickEnter",
+            "ClaimMonthlyCardPopup",
+            "CloseTopRightModal",
+            "StartupWaitLoading"
         ],
+        "timeout": 180000
+    },
+    "CheckMainWorld": {
+        "desc": "识别左上角手机图标确认位于大世界",
+        "recognition": "TemplateMatch",
+        "template": "hud_phone.png",
+        "roi": [
+            5,
+            25,
+            65,
+            70
+        ],
+        "threshold": 0.72,
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "focus": {
+            "Node.Recognition.Succeeded": "已进入崩坏：星穹铁道大世界主界面"
+        }
+    },
+    "OpenPhoneMenu": {
+        "desc": "打开左上角手机主菜单",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "InPhoneMenuCheck",
+            "ClickPhoneIcon"
+        ]
+    },
+    "InPhoneMenuCheck": {
+        "desc": "检查是否已在手机菜单",
+        "recognition": "OCR",
         "expected": [
             "委托",
-            "漫游签证",
-            "合成",
             "指南",
-            "每日实训",
-            "生存索引"
+            "无名勋礼"
         ],
-        "action": "DoNothing"
+        "roi": [
+            730,
+            250,
+            460,
+            450
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0
+    },
+    "ClickPhoneIcon": {
+        "desc": "点击左上角手机图标",
+        "recognition": "TemplateMatch",
+        "template": "hud_phone.png",
+        "roi": [
+            5,
+            25,
+            65,
+            70
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            30,
+            60
+        ],
+        "post_delay": 700
+    },
+    "CloseTopRightModal": {
+        "desc": "点击右上角关闭按钮",
+        "recognition": "TemplateMatch",
+        "template": "phone_close.png",
+        "roi": [
+            1190,
+            5,
+            85,
+            80
+        ],
+        "threshold": 0.72,
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600
+    },
+    "ReturnToMainWorld": {
+        "desc": "退回大世界主界面",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "CheckMainWorld",
+            "CloseTopRightModal"
+        ]
     }
 }

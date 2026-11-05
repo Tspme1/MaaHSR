@@ -1,0 +1,239 @@
+{
+    "DailyTraining": {
+        "desc": "每日实训活跃度奖励领取",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "DailySwitchTab",
+            "DailyAlreadyOpen",
+            "DailyOpenFromHud",
+            "DailyOpenPhone",
+            "DailyFromPhone"
+        ]
+    },
+    "DailyOpenFromHud": {
+        "desc": "在大世界点击右上角指南图标",
+        "recognition": "TemplateMatch",
+        "template": "hud_guide.png",
+        "roi": [
+            970,
+            10,
+            80,
+            75
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            1010,
+            44
+        ],
+        "post_delay": 800,
+        "next": [
+            "DailySwitchTab",
+            "DailyAlreadyOpen"
+        ]
+    },
+    "DailyOpenPhone": {
+        "desc": "在大世界点击左上角手机图标",
+        "recognition": "TemplateMatch",
+        "template": "hud_phone.png",
+        "roi": [
+            5,
+            25,
+            65,
+            70
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            30,
+            60
+        ],
+        "post_delay": 800,
+        "next": [
+            "DailyFromPhone"
+        ]
+    },
+    "DailyFromPhone": {
+        "desc": "从手机菜单点击指南磁贴",
+        "recognition": "OCR",
+        "expected": [
+            "指南"
+        ],
+        "roi": [
+            740,
+            575,
+            130,
+            115
+        ],
+        "action": "Click",
+        "target": [
+            802,
+            633
+        ],
+        "post_delay": 800,
+        "next": [
+            "DailySwitchTab",
+            "DailyAlreadyOpen"
+        ]
+    },
+    "DailySwitchTab": {
+        "desc": "打开指南后始终先点击第一个标签页（每日实训），防止因实训完成默认停留在第二页",
+        "recognition": "OCR",
+        "expected": [
+            "星际和平指南",
+            "每日实训",
+            "生存索引",
+            "逐光捡金",
+            "旷宇纷争",
+            "战术训练"
+        ],
+        "roi": [
+            20,
+            10,
+            600,
+            150
+        ],
+        "action": "Click",
+        "target": [
+            188,
+            112
+        ],
+        "post_delay": 700,
+        "next": [
+            "DailyAlreadyOpen"
+        ]
+    },
+    "DailyAlreadyOpen": {
+        "desc": "确认已在每日实训界面",
+        "recognition": "OCR",
+        "expected": [
+            "每日实训"
+        ],
+        "roi": [
+            20,
+            10,
+            250,
+            70
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "DailyCheckAlreadyFull",
+            "DailyClaimTaskCard",
+            "DailyClaimProgressNodes"
+        ]
+    },
+    "DailyCheckAlreadyFull": {
+        "desc": "检查本日活跃度是否已满",
+        "recognition": "OCR",
+        "expected": [
+            "本日活跃度已满"
+        ],
+        "roi": [
+            100,
+            520,
+            1080,
+            120
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "focus": {
+            "Node.Recognition.Succeeded": "今日每日实训活跃度已满（500/500），无需重复领取"
+        },
+        "next": [
+            "DailyDoneClose"
+        ]
+    },
+    "DailyClaimTaskCard": {
+        "desc": "点击单项任务卡片领取",
+        "recognition": "OCR",
+        "expected": [
+            "领取"
+        ],
+        "roi": [
+            100,
+            520,
+            1080,
+            120
+        ],
+        "action": "Click",
+        "post_delay": 600,
+        "next": [
+            "DailyClaimTaskCard",
+            "DailyClaimProgressNodes"
+        ]
+    },
+    "DailyClaimProgressNodes": {
+        "desc": "点击顶部活跃度进度条宝箱（点满500档）",
+        "action": "Click",
+        "target": [
+            1135,
+            187
+        ],
+        "post_delay": 600,
+        "next": [
+            "DailyDismissReward",
+            "DailyDoneClose"
+        ]
+    },
+    "DailyDismissReward": {
+        "desc": "关闭活跃度奖励弹窗",
+        "recognition": "OCR",
+        "expected": [
+            "点击空白处关闭",
+            "获得物品"
+        ],
+        "roi": [
+            400,
+            100,
+            480,
+            600
+        ],
+        "action": "Click",
+        "target": [
+            640,
+            680
+        ],
+        "post_delay": 600,
+        "next": [
+            "DailyDoneClose"
+        ]
+    },
+    "DailyDoneClose": {
+        "desc": "关闭指南界面",
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "DailyExitPhone",
+            "CheckMainWorld"
+        ]
+    },
+    "DailyExitPhone": {
+        "desc": "若在手机菜单则关闭退出",
+        "recognition": "TemplateMatch",
+        "template": "phone_close.png",
+        "roi": [
+            1190,
+            5,
+            85,
+            80
+        ],
+        "threshold": 0.72,
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "CheckMainWorld"
+        ]
+    }
+}

@@ -1,0 +1,34 @@
+MIT License
+
+Copyright (c) 2026 Tspme1 (MaaHSR Contributors)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+### 第三方开源组件与致谢声明 (Third-Party Open Source Notice)
+
+1. **MaaFramework** (https://github.com/MaaXYZ/MaaFramework)
+   - 基于图像识别与流水线状态机的次世代自动化黑盒测试框架，采用 **LGPL-3.0** 许可证开源。
+2. **MaaAssistantArknights (MAA)** (https://github.com/MaaAssistantArknights/MaaAssistantArknights)
+   - 感谢 MAA 开源社区开创的视觉自动化理念、架构设计与分体式资源热更新方案。
+3. **MaaFwApp / MaaMeow** (https://github.com/Aliothmoon/MaaFwApp)
+   - 感谢 Aliothmoon 开发的 MaaFramework Android 原生宿主客户端与 Shizuku 虚拟屏框架，采用 **AGPL-3.0** 许可证开源。
+4. **PaddleOCR (PP-OCRv4)** (https://github.com/PaddlePaddle/PaddleOCR)
+   - 离线文字识别模型，采用 **Apache-2.0** 许可证开源。

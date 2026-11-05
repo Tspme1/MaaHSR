@@ -1,0 +1,173 @@
+{
+    "Mail": {
+        "desc": "邮件一键全部领取",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "MailAlreadyOpen",
+            "MailFromPhone",
+            "MailOpenPhone",
+            "MailReturnAndRetry"
+        ]
+    },
+    "MailOpenPhone": {
+        "desc": "在大世界点击左上角手机打开菜单",
+        "recognition": "TemplateMatch",
+        "template": "hud_phone.png",
+        "roi": [
+            5,
+            25,
+            65,
+            70
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            30,
+            60
+        ],
+        "post_delay": 800,
+        "next": [
+            "MailFromPhone"
+        ]
+    },
+    "MailFromPhone": {
+        "desc": "从手机右侧栏点击邮件图标",
+        "recognition": "TemplateMatch",
+        "template": "phone_mail.png",
+        "roi": [
+            1195,
+            190,
+            80,
+            80
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            1236,
+            230
+        ],
+        "post_delay": 900,
+        "next": [
+            "MailAlreadyOpen"
+        ]
+    },
+    "MailAlreadyOpen": {
+        "desc": "确认已在邮箱界面",
+        "recognition": "OCR",
+        "expected": [
+            "邮箱",
+            "全部领取",
+            "删除已读"
+        ],
+        "roi": [
+            20,
+            10,
+            500,
+            690
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "MailClickClaimAll",
+            "MailDoneClose"
+        ]
+    },
+    "MailClickClaimAll": {
+        "desc": "点击全部领取",
+        "recognition": "OCR",
+        "expected": [
+            "全部领取"
+        ],
+        "roi": [
+            250,
+            620,
+            230,
+            75
+        ],
+        "action": "Click",
+        "target": [
+            365,
+            657
+        ],
+        "post_delay": 900,
+        "focus": {
+            "Node.Recognition.Succeeded": "已点击邮件【全部领取】"
+        },
+        "next": [
+            "MailDismissReward",
+            "MailDoneClose"
+        ]
+    },
+    "MailDismissReward": {
+        "desc": "关闭邮件领取获得物品浮层",
+        "recognition": "OCR",
+        "expected": [
+            "点击空白处关闭",
+            "获得物品"
+        ],
+        "roi": [
+            400,
+            100,
+            480,
+            600
+        ],
+        "action": "Click",
+        "target": [
+            640,
+            680
+        ],
+        "post_delay": 600,
+        "next": [
+            "MailDoneClose"
+        ]
+    },
+    "MailDoneClose": {
+        "desc": "关闭邮箱界面",
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "MailExitPhone",
+            "CheckMainWorld"
+        ]
+    },
+    "MailExitPhone": {
+        "desc": "关闭手机菜单退回大世界",
+        "recognition": "TemplateMatch",
+        "template": "phone_close.png",
+        "roi": [
+            1190,
+            5,
+            85,
+            80
+        ],
+        "threshold": 0.72,
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "CheckMainWorld"
+        ]
+    },
+    "MailReturnAndRetry": {
+        "desc": "异常时退回重试",
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "MailOpenPhone",
+            "MailFromPhone"
+        ]
+    }
+}

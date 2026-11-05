@@ -1,0 +1,214 @@
+{
+    "Assignments": {
+        "desc": "每日委托一键领取与再次派遣",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "AssignmentAlreadyOpen",
+            "AssignmentFromPhone",
+            "AssignmentOpenPhone",
+            "AssignmentReturnAndRetry"
+        ]
+    },
+    "AssignmentOpenPhone": {
+        "desc": "在大世界点击左上角手机打开菜单",
+        "recognition": "TemplateMatch",
+        "template": "hud_phone.png",
+        "roi": [
+            5,
+            25,
+            65,
+            70
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            30,
+            60
+        ],
+        "post_delay": 800,
+        "next": [
+            "AssignmentFromPhone"
+        ]
+    },
+    "AssignmentFromPhone": {
+        "desc": "从手机菜单点击【委托】磁贴",
+        "recognition": "OCR",
+        "expected": [
+            "委托"
+        ],
+        "roi": [
+            1050,
+            250,
+            140,
+            120
+        ],
+        "action": "Click",
+        "target": [
+            1123,
+            310
+        ],
+        "post_delay": 900,
+        "next": [
+            "AssignmentAlreadyOpen"
+        ]
+    },
+    "AssignmentAlreadyOpen": {
+        "desc": "确认已在委托界面",
+        "recognition": "OCR",
+        "expected": [
+            "委托",
+            "进行中的委托",
+            "委托奖励"
+        ],
+        "roi": [
+            20,
+            10,
+            900,
+            650
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "AssignmentClickClaimYellow",
+            "AssignmentClickOneKeyClaim",
+            "AssignmentDoneClose"
+        ]
+    },
+    "AssignmentClickClaimYellow": {
+        "desc": "点击右下角金色【领取奖励】按钮",
+        "recognition": "TemplateMatch",
+        "template": "assignment_claim.png",
+        "roi": [
+            840,
+            590,
+            340,
+            90
+        ],
+        "threshold": 0.75,
+        "action": "Click",
+        "target": [
+            1011,
+            636
+        ],
+        "post_delay": 900,
+        "focus": {
+            "Node.Recognition.Succeeded": "已点击委托【领取奖励】"
+        },
+        "next": [
+            "AssignmentDismissReward",
+            "AssignmentDoneClose"
+        ]
+    },
+    "AssignmentClickOneKeyClaim": {
+        "desc": "识别并点击一键领取",
+        "recognition": "OCR",
+        "expected": [
+            "一键领取",
+            "领取奖励"
+        ],
+        "roi": [
+            350,
+            580,
+            830,
+            110
+        ],
+        "action": "Click",
+        "post_delay": 900,
+        "next": [
+            "AssignmentRedispatch",
+            "AssignmentDismissReward",
+            "AssignmentDoneClose"
+        ]
+    },
+    "AssignmentRedispatch": {
+        "desc": "点击再次派遣",
+        "recognition": "OCR",
+        "expected": [
+            "再次派遣"
+        ],
+        "roi": [
+            400,
+            580,
+            600,
+            110
+        ],
+        "action": "Click",
+        "post_delay": 900,
+        "next": [
+            "AssignmentDismissReward",
+            "AssignmentDoneClose"
+        ]
+    },
+    "AssignmentDismissReward": {
+        "desc": "关闭委托奖励弹窗",
+        "recognition": "OCR",
+        "expected": [
+            "点击空白处关闭",
+            "获得物品"
+        ],
+        "roi": [
+            400,
+            100,
+            480,
+            600
+        ],
+        "action": "Click",
+        "target": [
+            640,
+            680
+        ],
+        "post_delay": 600,
+        "next": [
+            "AssignmentDoneClose"
+        ]
+    },
+    "AssignmentDoneClose": {
+        "desc": "关闭委托界面退回手机菜单",
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "AssignmentExitPhone",
+            "CheckMainWorld"
+        ]
+    },
+    "AssignmentExitPhone": {
+        "desc": "关闭手机菜单退回大世界",
+        "recognition": "TemplateMatch",
+        "template": "phone_close.png",
+        "roi": [
+            1190,
+            5,
+            85,
+            80
+        ],
+        "threshold": 0.72,
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "CheckMainWorld"
+        ]
+    },
+    "AssignmentReturnAndRetry": {
+        "desc": "异常时退回重试",
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 600,
+        "next": [
+            "AssignmentOpenPhone",
+            "AssignmentFromPhone"
+        ]
+    }
+}

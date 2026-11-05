@@ -6,7 +6,15 @@ Android/MaaFwApp/app/src/main/jniLibs/
 Android/MaaFwApp/build/
 Android/MaaFwApp/app/build/
 Android/MaaFwApp/.gradle/
+Android/MaaFwApp/.kotlin/
+Android/MaaFwApp/*/build/
 assets/resource/model/ocr/*.onnx
 assets/resource/model/ocr/keys.txt
+assets/resource/image/captures/
+screenshots_raw/
+logs_pulled/
+release/
+dist/
 debug/
 __pycache__/
+*.apk

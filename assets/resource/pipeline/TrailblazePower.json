@@ -1,0 +1,860 @@
+{
+    "TrailblazePower": {
+        "desc": "消耗开拓力刷副本/拟造花萼/饰品提取/侵蚀隧洞",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "PowerStageReady",
+            "PowerInStageDetail",
+            "PowerInSurvivalIndex",
+            "PowerOpenGuideFromHud",
+            "PowerOpenPhone",
+            "PowerFromPhone"
+        ]
+    },
+    "PowerOpenGuideFromHud": {
+        "desc": "在大世界点击右上角指南图标",
+        "recognition": "TemplateMatch",
+        "template": "hud_guide.png",
+        "roi": [
+            970,
+            10,
+            80,
+            75
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            1010,
+            44
+        ],
+        "post_delay": 800,
+        "next": [
+            "PowerInSurvivalIndex",
+            "PowerSwitchToSurvivalTab"
+        ]
+    },
+    "PowerOpenPhone": {
+        "desc": "在大世界点击左上角手机图标",
+        "recognition": "TemplateMatch",
+        "template": "hud_phone.png",
+        "roi": [
+            5,
+            25,
+            65,
+            70
+        ],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [
+            30,
+            60
+        ],
+        "post_delay": 700,
+        "next": [
+            "PowerFromPhone"
+        ]
+    },
+    "PowerFromPhone": {
+        "desc": "从手机菜单点击指南磁贴",
+        "recognition": "OCR",
+        "expected": [
+            "指南"
+        ],
+        "roi": [
+            740,
+            575,
+            130,
+            115
+        ],
+        "action": "Click",
+        "target": [
+            802,
+            633
+        ],
+        "post_delay": 800,
+        "next": [
+            "PowerInSurvivalIndex",
+            "PowerSwitchToSurvivalTab"
+        ]
+    },
+    "PowerSwitchToSurvivalTab": {
+        "desc": "识别已在指南界面后点击生存索引标签",
+        "recognition": "OCR",
+        "expected": [
+            "每日实训",
+            "生存索引",
+            "旷宇纷争",
+            "战术训练",
+            "星际和平指南"
+        ],
+        "roi": [
+            20,
+            10,
+            600,
+            150
+        ],
+        "action": "Click",
+        "target": [
+            284,
+            112
+        ],
+        "post_delay": 700,
+        "next": [
+            "PowerInSurvivalIndex"
+        ]
+    },
+    "PowerInSurvivalIndex": {
+        "desc": "确认已在生存索引页面",
+        "recognition": "OCR",
+        "expected": [
+            "培养目标",
+            "饰品提取",
+            "拟造花萼",
+            "凝滞虚影",
+            "侵蚀隧洞"
+        ],
+        "roi": [
+            105,
+            220,
+            330,
+            460
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "PowerSelectCategory",
+            "PowerScrollLeftToTop"
+        ]
+    },
+    "PowerScrollLeftToTop": {
+        "desc": "若左侧分类已下滑则拉回顶部",
+        "recognition": "DirectHit",
+        "action": "Swipe",
+        "begin": [
+            270,
+            260
+        ],
+        "end": [
+            270,
+            580
+        ],
+        "duration": 350,
+        "post_delay": 600,
+        "max_hit": 1,
+        "next": [
+            "PowerSelectCategory"
+        ]
+    },
+    "PowerSelectCategory": {
+        "desc": "OCR识别并点击左侧副本分类（默认培养目标，由选项覆写）",
+        "recognition": "OCR",
+        "expected": [
+            "培养目标"
+        ],
+        "roi": [
+            105,
+            220,
+            330,
+            460
+        ],
+        "action": "Click",
+        "post_delay": 700,
+        "next": [
+            "PowerClickEnterStage"
+        ]
+    },
+    "PowerClickCavernTab": {
+        "desc": "点击侵蚀隧洞分类",
+        "recognition": "OCR",
+        "expected": [
+            "侵蚀隧洞",
+            "遗器"
+        ],
+        "roi": [
+            105,
+            220,
+            330,
+            460
+        ],
+        "action": "Click",
+        "post_delay": 700,
+        "next": [
+            "PowerClickEnterStage"
+        ]
+    },
+    "PowerClickStagnantTab": {
+        "desc": "点击凝滞虚影分类",
+        "recognition": "OCR",
+        "expected": [
+            "凝滞虚影",
+            "角色晋阶材料"
+        ],
+        "roi": [
+            105,
+            220,
+            330,
+            460
+        ],
+        "action": "Click",
+        "post_delay": 700,
+        "next": [
+            "PowerClickEnterStage"
+        ]
+    },
+    "PowerClickEchoTab": {
+        "desc": "点击历战余响分类",
+        "recognition": "OCR",
+        "expected": [
+            "历战余响",
+            "行迹高级材料"
+        ],
+        "roi": [
+            105,
+            220,
+            330,
+            460
+        ],
+        "action": "Click",
+        "post_delay": 700,
+        "next": [
+            "PowerClickEnterStage"
+        ]
+    },
+    "PowerClickEnterStage": {
+        "desc": "点击右侧列表第一排的【进入】或【传送】",
+        "recognition": "OCR",
+        "expected": [
+            "进入",
+            "传送"
+        ],
+        "roi": [
+            985,
+            195,
+            190,
+            135
+        ],
+        "order_by": "Vertical",
+        "index": 0,
+        "action": "Click",
+        "post_delay": 900,
+        "focus": {
+            "Node.Recognition.Succeeded": "已从生存索引进入副本关卡页"
+        },
+        "next": [
+            "PowerWaitStagePanel"
+        ]
+    },
+    "PowerWaitStagePanel": {
+        "desc": "等待关卡准备面板加载完成",
+        "recognition": "OCR",
+        "expected": [
+            "挑战次数",
+            "开始挑战",
+            "挑战"
+        ],
+        "roi": [
+            750,
+            540,
+            500,
+            155
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 100,
+        "next": [
+            "PowerEnableQuickRefill",
+            "PowerAddChallengeCount",
+            "PowerAfterSetCount"
+        ]
+    },
+    "PowerEnableQuickRefill": {
+        "desc": "检查并开启【快捷补充开拓力】开关（兼容普通副本与位面饰品提取不同纵坐标）",
+        "recognition": "TemplateMatch",
+        "template": "quick_refill_off.png",
+        "roi": [
+            1175,
+            460,
+            80,
+            95
+        ],
+        "threshold": 0.72,
+        "action": "Click",
+        "pre_delay": 80,
+        "post_delay": 450,
+        "max_hit": 1,
+        "focus": {
+            "Node.Recognition.Succeeded": "已开启【快捷补充开拓力】开关"
+        },
+        "next": [
+            "PowerAddChallengeCount",
+            "PowerAfterSetCount"
+        ]
+    },
+    "PowerAddChallengeCount": {
+        "desc": "通过模板匹配点击右下角亮色【+】按钮设置挑战次数（到达上限变灰时自动停止）",
+        "recognition": "TemplateMatch",
+        "template": "count_plus.png",
+        "roi": [
+            1170,
+            515,
+            85,
+            95
+        ],
+        "threshold": 0.72,
+        "action": "Click",
+        "pre_delay": 40,
+        "post_delay": 160,
+        "max_hit": 0,
+        "next": [
+            "PowerAddChallengeCount",
+            "PowerAfterSetCount"
+        ]
+    },
+    "PowerAfterSetCount": {
+        "desc": "完成挑战次数设置后进入挑战或编队",
+        "recognition": "DirectHit",
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "PowerQuickBattleClick",
+            "PowerStageReady",
+            "PowerInStageDetail"
+        ]
+    },
+    "PowerQuickBattleClick": {
+        "desc": "点击【快速刷取】使用助燃券秒刷（拟造花萼/凝滞虚影）",
+        "recognition": "OCR",
+        "expected": [
+            "快速刷取"
+        ],
+        "roi": [
+            600,
+            620,
+            190,
+            80
+        ],
+        "action": "Click",
+        "target": [
+            694,
+            662
+        ],
+        "post_delay": 1000,
+        "max_hit": 0,
+        "focus": {
+            "Node.Recognition.Succeeded": "已点击【快速刷取】，等待确认弹窗..."
+        },
+        "next": [
+            "PowerInsufficientCancel",
+            "PowerQuickBattleConfirm",
+            "PowerStageReady",
+            "PowerInStageDetail"
+        ]
+    },
+    "PowerQuickBattleConfirm": {
+        "desc": "在快速刷取确认弹窗中点击【确认】",
+        "recognition": "OCR",
+        "expected": [
+            "确认",
+            "确定",
+            "使用助燃券"
+        ],
+        "roi": [
+            620,
+            360,
+            400,
+            270
+        ],
+        "action": "Click",
+        "target": [
+            815,
+            590
+        ],
+        "post_delay": 1500,
+        "focus": {
+            "Node.Recognition.Succeeded": "已确认使用助燃券快速刷取，等待刷取完成..."
+        },
+        "next": [
+            "PowerInsufficientCancel",
+            "PowerQuickBattleDismiss",
+            "PowerQuickBattleCloseTemplate"
+        ]
+    },
+    "PowerQuickBattleDismiss": {
+        "desc": "助燃券快速刷取完成后点击【关闭】按钮",
+        "recognition": "OCR",
+        "expected": [
+            "关闭",
+            "再来一次",
+            "第1次刷取"
+        ],
+        "roi": [
+            280,
+            280,
+            720,
+            350
+        ],
+        "action": "Click",
+        "target": [
+            465,
+            590
+        ],
+        "post_delay": 1000,
+        "focus": {
+            "Node.Recognition.Succeeded": "已完成助燃券快速刷取，点击【关闭】并退回大世界"
+        },
+        "next": [
+            "PowerCloseAfterExit",
+            "PowerCloseStageByText",
+            "PowerDoneClose",
+            "CheckMainWorld"
+        ]
+    },
+    "PowerQuickBattleCloseTemplate": {
+        "desc": "通过模板匹配点击快速刷取完成后的【关闭】按钮",
+        "recognition": "TemplateMatch",
+        "template": "quick_battle_close.png",
+        "roi": [
+            290,
+            540,
+            350,
+            90
+        ],
+        "threshold": 0.85,
+        "action": "Click",
+        "target": [
+            465,
+            590
+        ],
+        "post_delay": 1000,
+        "focus": {
+            "Node.Recognition.Succeeded": "已完成助燃券快速刷取，点击【关闭】并退回大世界"
+        },
+        "next": [
+            "PowerCloseAfterExit",
+            "PowerCloseStageByText",
+            "PowerDoneClose",
+            "CheckMainWorld"
+        ]
+    },
+    "PowerInStageDetail": {
+        "desc": "在副本详情页识别并点击【挑战】",
+        "recognition": "OCR",
+        "expected": [
+            "挑战"
+        ],
+        "roi": [
+            790,
+            615,
+            470,
+            85
+        ],
+        "action": "Click",
+        "target": [
+            1030,
+            662
+        ],
+        "post_delay": 900,
+        "next": [
+            "PowerInsufficientCancel",
+            "PowerStageReady"
+        ]
+    },
+    "PowerStageReady": {
+        "desc": "关卡准备就绪（匹配位面饰品提取与编成页开始挑战）",
+        "recognition": "OCR",
+        "expected": [
+            "开始挑战"
+        ],
+        "roi": [
+            830,
+            610,
+            430,
+            85
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "PowerClickStartChallenge"
+        ]
+    },
+    "PowerClickSupportBtn": {
+        "desc": "点击【支援】按钮选择支援角色",
+        "recognition": "OCR",
+        "expected": [
+            "支援"
+        ],
+        "roi": [
+            470,
+            520,
+            760,
+            170
+        ],
+        "action": "Click",
+        "post_delay": 700,
+        "max_hit": 1,
+        "focus": {
+            "Node.Recognition.Succeeded": "正在打开支援列表选择好友第一位支援角色..."
+        },
+        "next": [
+            "PowerSelectFirstSupport"
+        ]
+    },
+    "PowerSelectFirstSupport": {
+        "desc": "在支援角色列表中点击左侧第一位好友支援角色卡片",
+        "recognition": "OCR",
+        "expected": [
+            "支援列表",
+            "支援角色",
+            "仅查看好友",
+            "刷新列表",
+            "支援详情"
+        ],
+        "roi": [
+            20,
+            40,
+            480,
+            660
+        ],
+        "action": "Click",
+        "target": [
+            220,
+            190
+        ],
+        "post_delay": 550,
+        "focus": {
+            "Node.Recognition.Succeeded": "已选中第一位好友支援角色"
+        },
+        "next": [
+            "PowerConfirmSupportJoin",
+            "PowerClickStartChallenge"
+        ]
+    },
+    "PowerConfirmSupportJoin": {
+        "desc": "在普通副本支援角色页点击右下角【确认】让第一位好友支援角色入队",
+        "recognition": "OCR",
+        "expected": [
+            "确认",
+            "入队",
+            "更换"
+        ],
+        "roi": [
+            900,
+            615,
+            350,
+            85
+        ],
+        "action": "Click",
+        "target": [
+            1085,
+            664
+        ],
+        "post_delay": 700,
+        "focus": {
+            "Node.Recognition.Succeeded": "已确认第一位好友支援角色入队"
+        },
+        "next": [
+            "PowerClickStartChallenge"
+        ]
+    },
+    "PowerClickStartChallenge": {
+        "desc": "点击【开始挑战】进入关卡战斗",
+        "recognition": "OCR",
+        "expected": [
+            "开始挑战"
+        ],
+        "roi": [
+            830,
+            610,
+            430,
+            85
+        ],
+        "action": "Click",
+        "target": [
+            1070,
+            660
+        ],
+        "post_delay": 2500,
+        "max_hit": 2,
+        "focus": {
+            "Node.Recognition.Succeeded": "已点击【开始挑战】，进入战斗流程..."
+        },
+        "next": [
+            "PowerInsufficientCancel",
+            "PowerBattleSuccess",
+            "PowerClickStartChallenge",
+            "PowerWaitBattleFinish"
+        ]
+    },
+    "PowerWaitBattleFinish": {
+        "desc": "等待战斗完成，循环点击普攻区触发位面饰品提取/凝滞虚影大世界开怪",
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [
+            1110,
+            580
+        ],
+        "post_delay": 2500,
+        "next": [
+            "PowerInsufficientCancel",
+            "PowerBattleSuccess",
+            "PowerWaitBattleFinish"
+        ],
+        "timeout": 300000
+    },
+    "PowerBattleSuccess": {
+        "desc": "战斗结算成功，判断是否再来一次或退出关卡",
+        "recognition": "OCR",
+        "expected": [
+            "挑战成功",
+            "退出关卡",
+            "再来一次"
+        ],
+        "roi": [
+            250,
+            50,
+            780,
+            630
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 0,
+        "next": [
+            "PowerBattleAgain",
+            "PowerBattleExit"
+        ]
+    },
+    "PowerBattleAgain": {
+        "desc": "当自定义刷取次数超过单次上限时，点击【再来一次】继续下一整轮",
+        "recognition": "OCR",
+        "expected": [
+            "再来一次"
+        ],
+        "roi": [
+            670,
+            595,
+            340,
+            80
+        ],
+        "action": "Click",
+        "target": [
+            844,
+            634
+        ],
+        "post_delay": 2500,
+        "max_hit": 0,
+        "focus": {
+            "Node.Recognition.Succeeded": "自定义次数未满，点击【再来一次】继续下一轮刷取"
+        },
+        "next": [
+            "PowerInsufficientCancel",
+            "PowerBattleSuccess",
+            "PowerWaitBattleFinish"
+        ]
+    },
+    "PowerBattleExit": {
+        "desc": "点击【退出关卡】",
+        "recognition": "OCR",
+        "expected": [
+            "退出关卡"
+        ],
+        "roi": [
+            260,
+            595,
+            350,
+            80
+        ],
+        "action": "Click",
+        "target": [
+            436,
+            634
+        ],
+        "post_delay": 2000,
+        "focus": {
+            "Node.Recognition.Succeeded": "已完成当前轮次，退出关卡"
+        },
+        "next": [
+            "PowerRemainderReenter",
+            "CheckMainWorld",
+            "PowerCloseAfterExit",
+            "PowerCloseStageByText",
+            "PowerExitDomainToMainWorld"
+        ]
+    },
+    "PowerRemainderReenter": {
+        "desc": "当自定义次数有余数轮次时，在退回关卡面板后重新设置余数次数并再次挑战",
+        "recognition": "OCR",
+        "expected": [
+            "挑战次数",
+            "开始挑战",
+            "挑战"
+        ],
+        "roi": [
+            750,
+            540,
+            500,
+            155
+        ],
+        "action": "DoNothing",
+        "pre_delay": 0,
+        "post_delay": 150,
+        "max_hit": 0,
+        "focus": {
+            "Node.Recognition.Succeeded": "开始执行自定义刷取次数的剩余轮次..."
+        },
+        "next": [
+            "PowerAddRemainderCount",
+            "PowerAfterSetCount"
+        ]
+    },
+    "PowerAddRemainderCount": {
+        "desc": "为剩余轮次点击【+】按钮设置余数挑战次数",
+        "recognition": "TemplateMatch",
+        "template": "count_plus.png",
+        "roi": [
+            1170,
+            515,
+            85,
+            95
+        ],
+        "threshold": 0.72,
+        "action": "Click",
+        "pre_delay": 40,
+        "post_delay": 160,
+        "max_hit": 0,
+        "next": [
+            "PowerAddRemainderCount",
+            "PowerAfterSetCount"
+        ]
+    },
+    "PowerExitDomainToMainWorld": {
+        "desc": "若退关后停留在关卡详情页或指南页，点击右上角叉号关闭",
+        "recognition": "TemplateMatch",
+        "template": [
+            "stage_close_dark.png",
+            "phone_close.png"
+        ],
+        "roi": [
+            1190,
+            5,
+            85,
+            80
+        ],
+        "threshold": 0.65,
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 900,
+        "next": [
+            "CheckMainWorld",
+            "PowerCloseAfterExit",
+            "PowerCloseStageByText"
+        ]
+    },
+    "PowerInsufficientCancel": {
+        "desc": "开拓力与后备开拓力均不足时弹出【开拓力补充】弹窗，点击取消并退回大世界",
+        "recognition": "OCR",
+        "expected": [
+            "开拓力补充",
+            "请选择补充方式",
+            "取出等量后备开拓力",
+            "星琼补充"
+        ],
+        "roi": [
+            260,
+            140,
+            760,
+            360
+        ],
+        "action": "Click",
+        "target": [
+            465,
+            520
+        ],
+        "post_delay": 1100,
+        "focus": {
+            "Node.Recognition.Succeeded": "体力不足，已停止刷取并退回大世界"
+        },
+        "next": [
+            "PowerCloseAfterExit",
+            "PowerCloseStageByText",
+            "PowerDoneClose",
+            "CheckMainWorld"
+        ]
+    },
+    "PowerCloseAfterExit": {
+        "desc": "若退关后仍有深色/浅色右上角叉号窗口，点击叉号关闭",
+        "recognition": "TemplateMatch",
+        "template": [
+            "stage_close_dark.png",
+            "phone_close.png"
+        ],
+        "roi": [
+            1190,
+            5,
+            85,
+            80
+        ],
+        "threshold": 0.65,
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 900,
+        "max_hit": 4,
+        "next": [
+            "CheckMainWorld",
+            "PowerCloseAfterExit",
+            "PowerCloseStageByText"
+        ]
+    },
+    "PowerCloseStageByText": {
+        "desc": "通过识别关卡页或指南页文字直接点击右上角叉号退出",
+        "recognition": "OCR",
+        "expected": [
+            "挑战",
+            "开始挑战",
+            "挑战次数",
+            "拟造花萼",
+            "位面饰品",
+            "生存索引",
+            "星际和平指南"
+        ],
+        "roi": [
+            20,
+            10,
+            1240,
+            690
+        ],
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 900,
+        "max_hit": 4,
+        "next": [
+            "CheckMainWorld",
+            "PowerCloseAfterExit",
+            "PowerCloseStageByText"
+        ]
+    },
+    "PowerDoneClose": {
+        "desc": "关闭并退回大世界",
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 800,
+        "next": [
+            "CheckMainWorld"
+        ]
+    }
+}
