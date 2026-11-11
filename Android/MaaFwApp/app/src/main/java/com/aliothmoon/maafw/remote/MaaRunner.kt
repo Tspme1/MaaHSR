@@ -78,6 +78,15 @@ class MaaRunner(private val agentHost: AgentHost) {
     @Volatile
     private var saveOnError = true
 
+    @Volatile
+    private var currentTaskIndex: Int = -1
+    @Volatile
+    private var totalTaskCount: Int = 0
+    @Volatile
+    private var currentTaskName: String = ""
+    @Volatile
+    private var completedTaskCount: Int = 0
+
     private class ActiveAgent(val client: Pointer, val session: AgentSession) {
         /** 这个 client 当前登记着的对象；null 表示还没登记 */
         var sinks: SinkTargets? = null
@@ -96,15 +105,43 @@ class MaaRunner(private val agentHost: AgentHost) {
         projectRoot = path
     }
 
+    fun getRunProgressJson(): String = buildJsonObject {
+        put("running", isRunning())
+        put("index", currentTaskIndex)
+        put("completed", completedTaskCount)
+        put("total", totalTaskCount)
+        put("task", currentTaskName)
+    }.toString()
+
     /** JNA 回调必须被强引用住，否则会被 GC，native 回调时踩空 */
     private val eventSink = MaaFrameworkLibrary.MaaEventCallback { _, message, detailsJson, _ ->
-        Ln.i("MaaEventCallback on $message")
-        runCatching {
-            callbackRef.get()?.onEvent(message.orEmpty(), detailsJson.orEmpty())
-        }.onFailure {
-            // 回调穿回 native 会直接崩进程
-            Ln.w("MaaRunner: event dispatch failed: ${it.message}")
+        val msg = message.orEmpty()
+        val details = detailsJson.orEmpty()
+        if (shouldForwardEvent(msg, details)) {
+            Ln.i("MaaEventCallback on $msg")
+            runCatching {
+                callbackRef.get()?.onEvent(msg, details)
+            }.onFailure {
+                // 回调穿回 native 会直接崩进程
+                Ln.w("MaaRunner: event dispatch failed: ${it.message}")
+            }
         }
+    }
+
+    private fun shouldForwardEvent(msg: String, details: String): Boolean {
+        if (details.contains("\"focus\"")) return true
+        if (msg == "Node.Recognition.Starting" ||
+            msg == "Node.Recognition.Failed" ||
+            msg == "Node.Action.Starting" ||
+            msg == "Node.NextList.Starting" ||
+            msg == "Node.NextList.Succeeded"
+        ) {
+            return false
+        }
+        return msg.startsWith("Node.PipelineNode.") ||
+            msg.startsWith("Tasker.") ||
+            msg.startsWith("Resource.") ||
+            msg.endsWith(".Failed")
     }
 
     fun setCallback(callback: IMaaRunnerCallback?) {
@@ -247,6 +284,10 @@ class MaaRunner(private val agentHost: AgentHost) {
     private fun runPlan(payload: RunPlanPayload) {
         var outcome = RunOutcome.FAILED
         var reason = ""
+        currentTaskIndex = 0
+        totalTaskCount = payload.tasks.size
+        currentTaskName = ""
+        completedTaskCount = 0
         try {
             val lib = MaaFrameworkLoader.library
             if (lib == null) {
@@ -273,6 +314,9 @@ class MaaRunner(private val agentHost: AgentHost) {
                     cancelled = true
                     return@forEachIndexed
                 }
+                currentTaskIndex = index
+                totalTaskCount = payload.tasks.size
+                currentTaskName = task.taskName
                 notify { onTaskStarted(task.taskName, index, payload.tasks.size) }
 
                 val overrides = JsonArray(task.pipelineOverrides).toString()
@@ -282,6 +326,7 @@ class MaaRunner(private val agentHost: AgentHost) {
                     anyFailed = true
                     // 上面查过之后才叫停的，Tasker 正在停，新任务投不进去
                     val stopped = isStopRequested()
+                    completedTaskCount = index + 1
                     notify { onTaskFinished(task.taskName, false, "PostTask 被拒绝", stopped) }
                     return@forEachIndexed
                 }
@@ -291,6 +336,7 @@ class MaaRunner(private val agentHost: AgentHost) {
                 // PostStop 一发，在跑的任务就带着失败从 Wait 返回：外壳叫停的不算任务自己失败。
                 // 只认外壳的 stop，pipeline 经 agent 自己 PostStop 的照旧算失败
                 val stopped = !success && isStopRequested()
+                completedTaskCount = index + 1
                 notify { onTaskFinished(task.taskName, success, statusText(status), stopped) }
 
                 // Stop 之后 Tasker 会把剩余任务直接判失败，这里提前收尾避免刷一串假失败
@@ -308,6 +354,8 @@ class MaaRunner(private val agentHost: AgentHost) {
             reason = "${e.javaClass.simpleName}: ${e.message}"
             Ln.e("MaaRunner: run failed: $reason")
         } finally {
+            currentTaskIndex = -1
+            currentTaskName = ""
             synchronized(lifecycleLock) {
                 running = false
                 stopRequested = false

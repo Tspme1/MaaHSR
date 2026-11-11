@@ -8,9 +8,13 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.view.View
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -122,8 +126,6 @@ class RunNotificationFactory(
         val island = backend == LiveBackend.HYPER_ISLAND
         val builder = NotificationCompat.Builder(appContext, if (island) ISLAND_CHANNEL_ID else RUN_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_maahsr)
-            .setLargeIcon(appBitmap)
-            .setColor(content.barColor)
             .setContentTitle(content.title)
             .setContentText(content.text?.takeIf { it.isNotBlank() })
             .setContentIntent(contentIntent(notifyId))
@@ -131,17 +133,38 @@ class RunNotificationFactory(
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            // ProgressStyle 只在 36+ 生效；经典模板仍靠 setProgress，否则 9–15 没有条子
-            .setProgress(RunProgressSnapshots.PROGRESS_MAX, content.progress, content.indeterminate)
         content.timeoutMs?.let(builder::setTimeoutAfter)
         if (island) {
+            builder.setLargeIcon(appBitmap)
+            builder.setColor(content.barColor)
+            builder.setProgress(RunProgressSnapshots.PROGRESS_MAX, content.progress, content.indeterminate)
             builder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             runCatching { islandExtras(content, notifyId, firstFloat) }
                 .onFailure { Timber.e(it, "Failed to build HyperOS focus extras") }
                 .getOrNull()
                 ?.let(builder::addExtras)
         } else {
-            builder.setSilent(true).setStyle(progressStyle(content))
+            val remoteViews = RemoteViews(appContext.packageName, R.layout.notification_run_custom).apply {
+                setTextViewText(R.id.tv_title, content.title)
+                val subText = content.text?.takeIf { it.isNotBlank() }
+                if (subText != null) {
+                    setTextViewText(R.id.tv_subtitle, subText)
+                    setViewVisibility(R.id.tv_subtitle, View.VISIBLE)
+                } else {
+                    setViewVisibility(R.id.tv_subtitle, View.GONE)
+                }
+                val progressBitmap = renderProgressBarBitmap(
+                    progress = content.progress,
+                    max = RunProgressSnapshots.PROGRESS_MAX,
+                    indeterminate = content.indeterminate,
+                    barColor = content.barColor,
+                )
+                setImageViewBitmap(R.id.iv_progress_bar, progressBitmap)
+            }
+            builder.setSilent(true)
+                .setCustomContentView(remoteViews)
+                .setCustomBigContentView(remoteViews)
+
             if (backend == LiveBackend.LIVE_UPDATE) {
                 builder.setRequestPromotedOngoing(manager.canRequestPromotedOngoing())
                 content.progressLabel?.let(builder::setShortCriticalText)
@@ -276,5 +299,53 @@ class RunNotificationFactory(
         private const val BUSINESS_PROGRESS = "download_progress"
         private const val PROGRESS_COLOR = "#3482FF"
         private const val PROGRESS_UNREACH = "#33FFFFFF"
+
+        fun renderProgressBarBitmap(
+            progress: Int,
+            max: Int,
+            indeterminate: Boolean,
+            barColor: Int = 0xFF2196F3.toInt(),
+        ): Bitmap {
+            val width = 840
+            val height = 44
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+            val centerY = 22f
+            val radius = 7f
+            val left = 18f
+            val right = width - 18f // 822f
+            val top = centerY - radius
+            val bottom = centerY + radius
+
+            // Draw full track background (translucent blue)
+            paint.style = Paint.Style.FILL
+            paint.color = 0x402196F3
+            canvas.drawRoundRect(left, top, right, bottom, radius, radius, paint)
+
+            // Draw small blue end-cap circle at destination
+            paint.color = barColor
+            canvas.drawCircle(right - radius, centerY, radius, paint)
+
+            // Compute thumb position
+            val ratio = if (indeterminate) 0.35f else (progress.toFloat() / max.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
+            val thumbX = left + ratio * (right - left)
+
+            // Draw active progress bar
+            if (thumbX > left) {
+                paint.color = barColor
+                canvas.drawRoundRect(left, top, thumbX, bottom, radius, radius, paint)
+            }
+
+            // Draw white circular ball with subtle outer shadow
+            paint.color = 0x28000000
+            canvas.drawCircle(thumbX, centerY, 16f, paint)
+
+            paint.color = 0xFFFFFFFF.toInt()
+            canvas.drawCircle(thumbX, centerY, 14f, paint)
+
+            return bitmap
+        }
     }
 }

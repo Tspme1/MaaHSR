@@ -375,6 +375,8 @@ class RemoteServiceImpl : RemoteService.Stub() {
 
     override fun isRunning(): Boolean = runner.isRunning()
 
+    override fun getRunProgressJson(): String = runner.getRunProgressJson()
+
     override fun saveCachedImage(path: String?): Boolean =
         !path.isNullOrBlank() && runner.saveCachedImage(path)
 

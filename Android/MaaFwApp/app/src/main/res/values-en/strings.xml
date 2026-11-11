@@ -792,7 +792,7 @@
     <string name="notification_include_log_details">Attach the run log to the message</string>
     <string name="notification_section_test">Test push</string>
     <string name="notification_test_title">Test notification</string>
-    <string name="notification_test_message">This is a test notification from MaaFwApp</string>
+    <string name="notification_test_message">This is a test notification from MaaHSR</string>
 
     <!-- Push channel names -->
     <string name="notification_provider_server_chan">ServerChan</string>

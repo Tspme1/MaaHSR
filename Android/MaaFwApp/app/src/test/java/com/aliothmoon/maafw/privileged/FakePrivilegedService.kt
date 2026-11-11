@@ -142,6 +142,9 @@ open class FakePrivilegedService : RemoteService {
         return true
     }
     override fun isRunning(): Boolean = running
+    override fun getRunProgressJson(): String = """{"running":$running,"index":0,"completed":0,"total":0,"task":""}"""
+    override fun setMuteTargetApp(enabled: Boolean) = Unit
+    override fun setBackgroundFpsLimit(fps: Int) = Unit
     override fun maaVersion(): String = "fake"
     override fun testUnlock(credential: String?): Int = unlockResult
 

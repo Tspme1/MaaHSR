@@ -15,14 +15,18 @@
     "PowerOpenGuideFromHud": {
         "desc": "在大世界点击右上角指南图标",
         "recognition": "TemplateMatch",
-        "template": "hud_guide.png",
+        "template": [
+            "hud_guide_mask.png",
+            "hud_guide.png"
+        ],
+        "green_mask": true,
         "roi": [
             970,
             10,
             80,
             75
         ],
-        "threshold": 0.7,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             1010,
@@ -37,14 +41,18 @@
     "PowerOpenPhone": {
         "desc": "在大世界点击左上角手机图标",
         "recognition": "TemplateMatch",
-        "template": "hud_phone.png",
+        "template": [
+            "hud_phone_mask.png",
+            "hud_phone.png"
+        ],
+        "green_mask": true,
         "roi": [
             5,
             25,
             65,
             70
         ],
-        "threshold": 0.7,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             30,
@@ -734,9 +742,12 @@
         "desc": "若退关后停留在关卡详情页或指南页，点击右上角叉号关闭",
         "recognition": "TemplateMatch",
         "template": [
-            "stage_close_dark.png",
-            "phone_close.png"
+            "phone_close_mask.png",
+            "stage_close_dark_mask.png",
+            "phone_close.png",
+            "stage_close_dark.png"
         ],
+        "green_mask": true,
         "roi": [
             1190,
             5,
@@ -791,9 +802,12 @@
         "desc": "若退关后仍有深色/浅色右上角叉号窗口，点击叉号关闭",
         "recognition": "TemplateMatch",
         "template": [
-            "stage_close_dark.png",
-            "phone_close.png"
+            "phone_close_mask.png",
+            "stage_close_dark_mask.png",
+            "phone_close.png",
+            "stage_close_dark.png"
         ],
+        "green_mask": true,
         "roi": [
             1190,
             5,

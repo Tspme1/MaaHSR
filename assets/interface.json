@@ -5,10 +5,10 @@
     },
     "name": "MaaHSR",
     "label": "$app.label",
-    "title": "MaaHSR v0.0.1",
+    "title": "MaaHSR v0.0.2",
     "icon": "locales/icon.png",
     "github": "https://github.com/Tspme1/MaaHSR",
-    "version": "v0.0.1",
+    "version": "v0.0.2",
     "contact": "MaaHSR Android Automation Demo",
     "license": "MIT License\n\nCopyright (c) 2026 Tspme1 (MaaHSR Contributors)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n---\n致谢 (Acknowledgements):\n感谢 MaaAssistantArknights (MAA)、MaaFramework 与 MaaFwApp 开源项目。",
     "welcome": "欢迎使用 MaaHSR（崩坏：星穹铁道 Android 自动化助手 Demo）！\n\n请先确保已授权 Shizuku 并开启后台 720P 虚拟屏模式。",
@@ -421,7 +421,10 @@
                 },
                 {
                     "name": "UseFirstFriendSupport",
-                    "label": "使用好友第一位支援角色",
+                    "label": "使用好友支援角色",
+                    "option": [
+                        "SupportSlot"
+                    ],
                     "pipeline_override": {
                         "PowerStageReady": {
                             "next": [
@@ -610,6 +613,73 @@
                             "next": [
                                 "HonorSwitchToRewardTab"
                             ]
+                        }
+                    }
+                }
+            ]
+        },
+        "SupportSlot": {
+            "type": "select",
+            "label": "$option.support_slot.label",
+            "default_case": "Slot1",
+            "cases": [
+                {
+                    "name": "Slot1",
+                    "label": "第 1 位支援角色",
+                    "pipeline_override": {
+                        "PowerSelectFirstSupport": {
+                            "target": [
+                                220,
+                                190
+                            ],
+                            "focus": {
+                                "Node.Recognition.Succeeded": "已选中第 1 位好友支援角色"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Slot2",
+                    "label": "第 2 位支援角色",
+                    "pipeline_override": {
+                        "PowerSelectFirstSupport": {
+                            "target": [
+                                220,
+                                306
+                            ],
+                            "focus": {
+                                "Node.Recognition.Succeeded": "已选中第 2 位好友支援角色"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Slot3",
+                    "label": "第 3 位支援角色",
+                    "pipeline_override": {
+                        "PowerSelectFirstSupport": {
+                            "target": [
+                                220,
+                                422
+                            ],
+                            "focus": {
+                                "Node.Recognition.Succeeded": "已选中第 3 位好友支援角色"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Slot4",
+                    "label": "第 4 位支援角色",
+                    "pipeline_override": {
+                        "PowerSelectFirstSupport": {
+                            "target": [
+                                220,
+                                538
+                            ],
+                            "focus": {
+                                "Node.Recognition.Succeeded": "已选中第 4 位好友支援角色"
+                            }
                         }
                     }
                 }

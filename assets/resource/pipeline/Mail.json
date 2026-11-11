@@ -6,6 +6,7 @@
         "next": [
             "MailAlreadyOpen",
             "MailFromPhone",
+            "MailFromPhoneByAnchor",
             "MailOpenPhone",
             "MailReturnAndRetry"
         ]
@@ -13,14 +14,18 @@
     "MailOpenPhone": {
         "desc": "在大世界点击左上角手机打开菜单",
         "recognition": "TemplateMatch",
-        "template": "hud_phone.png",
+        "template": [
+            "hud_phone_mask.png",
+            "hud_phone.png"
+        ],
+        "green_mask": true,
         "roi": [
             5,
             25,
             65,
             70
         ],
-        "threshold": 0.7,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             30,
@@ -28,20 +33,56 @@
         ],
         "post_delay": 800,
         "next": [
-            "MailFromPhone"
+            "MailFromPhone",
+            "MailFromPhoneByAnchor"
         ]
     },
     "MailFromPhone": {
         "desc": "从手机右侧栏点击邮件图标",
         "recognition": "TemplateMatch",
-        "template": "phone_mail.png",
+        "template": [
+            "phone_mail_mask.png",
+            "phone_mail.png",
+            "phone_mail_warm.png",
+            "phone_mail_green.png"
+        ],
+        "green_mask": true,
         "roi": [
             1195,
             190,
             80,
             80
         ],
-        "threshold": 0.7,
+        "threshold": 0.65,
+        "action": "Click",
+        "target": [
+            1236,
+            230
+        ],
+        "post_delay": 900,
+        "next": [
+            "MailAlreadyOpen"
+        ]
+    },
+    "MailFromPhoneByAnchor": {
+        "desc": "当背景变化导致邮箱图标模板未命中时，通过识别手机菜单文字锚点直接点击右侧固定邮箱坐标",
+        "recognition": "OCR",
+        "expected": [
+            "委托",
+            "指南",
+            "合成",
+            "成就",
+            "角色",
+            "跃迁",
+            "商店",
+            "好友"
+        ],
+        "roi": [
+            580,
+            250,
+            620,
+            450
+        ],
         "action": "Click",
         "target": [
             1236,
@@ -139,14 +180,20 @@
     "MailExitPhone": {
         "desc": "关闭手机菜单退回大世界",
         "recognition": "TemplateMatch",
-        "template": "phone_close.png",
+        "template": [
+            "phone_close_mask.png",
+            "stage_close_dark_mask.png",
+            "phone_close.png",
+            "stage_close_dark.png"
+        ],
+        "green_mask": true,
         "roi": [
             1190,
             5,
             85,
             80
         ],
-        "threshold": 0.72,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             1235,
@@ -167,7 +214,8 @@
         "post_delay": 600,
         "next": [
             "MailOpenPhone",
-            "MailFromPhone"
+            "MailFromPhone",
+            "MailFromPhoneByAnchor"
         ]
     }
 }

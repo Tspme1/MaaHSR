@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Tspme1/MaaHSR/releases"><img src="https://img.shields.io/badge/release-v0.0.1-blue?style=flat-square" alt="Release v0.0.1" /></a>
+  <a href="https://github.com/Tspme1/MaaHSR/releases"><img src="https://img.shields.io/badge/release-v0.0.2-blue?style=flat-square" alt="Release v0.0.2" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License" /></a>
   <a href="https://github.com/MaaXYZ/MaaFramework"><img src="https://img.shields.io/badge/MaaFramework-v5.14.0-orange?style=flat-square" alt="MaaFramework v5.14.0" /></a>
 </p>
@@ -23,7 +23,7 @@
   - 采用 Android `AppOpsManager` 多通道音频管控（`OP_PLAY_AUDIO = 28` + `OP_TAKE_AUDIO_FOCUS = 32`）结合 `cmd appops set --uid` 双重静音锁。
   - 在关闭虚拟屏或强停游戏前，预先维持静音锁并先执行 `am force-stop`，彻底消除退出瞬间 1 秒声音外漏问题。
 
-### 2. 日常一条龙全流程自动化（`v0.0.1`）
+### 2. 日常一条龙全流程自动化（`v0.0.2`）
 安装 APK 后默认内置 **「日常一条龙」** 配置预设，开箱即用，包含以下 6 大核心任务模块：
 
 | 顺序 | 任务名称 | 功能与自动化细节 |
@@ -49,8 +49,8 @@
 3. **自动开启「快捷补充」与体力不足智能中止**：
    - 进入关卡准备页后自动检测「快捷补充」开关（兼容普通副本 `[1216, 519]` 与位面饰品 `[1210, 583]` 双位置），关闭时自动打开，实现后备开拓力无缝续刷。
    - 若体力与后备开拓力均耗尽弹出补充确认框，自动识别并点击「取消」，在运行日志中输出 **「体力不足，已停止刷取并退回大世界」**，随后安全退回大世界继续执行后续任务。
-4. **好友第一位支援角色 & 助燃券速刷闭环**：
-   - 支援列表精准点击左上角第一位好友支援槽位 `[215, 220]` 并点击入队确认。
+4. **好友支援角色（支持指定第 1 / 2 / 3 / 4 位序号） & 助燃券速刷闭环**：
+   - 支援列表精准点击指定的好友支援槽位（默认第 1 位 `[215, 220]`，支持第 1~4 位任意自选）并点击入队确认。
    - 助燃券快速战斗支持：点击「快速战斗」→ 弹窗点击「确认」→ 等待结算完成点击「关闭」→ 点击右上角「×」安全退回大世界。
 
 ### 4. 任务与日志交互优化
@@ -62,12 +62,13 @@
 - **通知栏与实时更新进度条**：
   - 专为 Android 状态栏与 OriginOS 实时活动通知定制 `ic_notification_maahsr` 镂空剪影小图标 + 彩色星穹铁道大图标 + 进度条白色圆球游标（`ic_progress_tracker`）。
 
-### 5. GitHub 双轨 OTA 更新系统（APP 整包更新 + 资源包秒级热更新）
+### 5. GitHub 双轨 OTA 更新系统与版本更新通知
+- **版本更新通知与变更日志**：详见根目录专用文档 [`CHANGELOG.md`](./CHANGELOG.md)。MaaHSR 客户端每次检测到新版本时，将自动解析并展示对应版本的更新说明弹窗。
 - **更新源地址**：`https://github.com/Tspme1/MaaHSR`（默认使用 GitHub 源，已屏蔽 Mirror 酱选项并开启启动自动检查更新）。
 - **双轨智能识别**：
   - **全量版本更新（APK）**：当 GitHub Release 包含 `MaaHSR-v<version>-arm64-v8a.apk` 时，自动下载并拉起系统安装器升级。
-  - **轻量资源热更新（ZIP）**：当 GitHub Release 仅上传 `MaaHSR-resource-v<version>.zip`（约 470 KB，不含 30MB OCR 模型）时，APP 自动下载并在应用内增量覆盖解压重载，**无需重新安装 APK 即可秒级更新流水线与截图模版**。
-- **版本号体系**：正式版采用标准三段式 `vX.Y.Z`（当前初始版本为 `v0.0.1`），测试/热更构建支持四段式 `vX.Y.Z.W`（如 `v0.0.1.1`，由 `UpdateVersion.kt` 自动转换为高优先级补丁号参与比较）。
+  - **轻量资源热更新（ZIP）**：当 GitHub Release 仅上传 `MaaHSR-resource-v<version>.zip`（约 480 KB，不含 18MB OCR 模型）时，APP 自动下载并在应用内增量覆盖解压重载，**无需重新安装 APK 即可秒级更新流水线与截图模版**。
+- **版本号体系**：正式版采用标准三段式 `vX.Y.Z`（当前版本为 `v0.0.2`），测试/热更构建支持四段式 `vX.Y.Z.W`（如 `v0.0.1.1`，由 `UpdateVersion.kt` 自动转换为高优先级补丁号参与比较）。
 
 ---
 
@@ -75,6 +76,7 @@
 
 ```text
 MaaHSR/
+├── CHANGELOG.md                       # 版本变更日志与客户端更新通知数据源
 ├── assets/
 │   ├── interface.json                 # MaaFramework 项目定义、任务、选项与默认预设配置
 │   ├── locales/
@@ -101,7 +103,7 @@ MaaHSR/
 ### 1. 生成流水线与轻量资源热更新包
 ```powershell
 python tools/build_hsr_resources.py
-python tools/build_resource_pack.py --version v0.0.1
+python tools/build_resource_pack.py --version v0.0.2
 ```
 
 ### 2. 编译 Android APK（内置完整 `pi.zip` 资源包）

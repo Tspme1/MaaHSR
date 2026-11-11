@@ -1,6 +1,7 @@
 package com.aliothmoon.maafw.runner
 
 import android.os.Process
+import org.json.JSONObject
 import com.aliothmoon.maafw.R
 import com.aliothmoon.maafw.IMaaRunnerCallback
 import com.aliothmoon.maafw.ITextInputSink
@@ -131,6 +132,7 @@ class MaaFrameworkRunnerPort(
             if (phase != RunnerPhase.Running && phase != RunnerPhase.Stopping) return@collectLatest
             while (true) {
                 delay(RECONCILE_INTERVAL_MS)
+                syncProgressFromRemote()
                 if (remoteRunning() != false) continue
                 delay(RECONCILE_GRACE_MS)
                 // onFinished 在宽限期内落地了，一切正常
@@ -140,6 +142,34 @@ class MaaFrameworkRunnerPort(
                 return@collectLatest
             }
         }
+    }
+
+    private suspend fun syncProgressFromRemote() = withContext(MaaDispatchers.IO) {
+        val jsonStr = runCatching { servicePort.serviceOrNull()?.getRunProgressJson() }.getOrNull()
+        if (jsonStr.isNullOrBlank()) return@withContext
+        runCatching {
+            val obj = JSONObject(jsonStr)
+            val running = obj.optBoolean("running", false)
+            val completed = obj.optInt("completed", 0)
+            val total = obj.optInt("total", 0)
+            val task = obj.optString("task", "")
+            if (running && task.isNotBlank()) {
+                _state.update { current ->
+                    val active = current.activeExecution ?: return@update current
+                    if (active.currentTaskName != task || active.completedTaskCount != completed) {
+                        current.copy(
+                            activeExecution = active.copy(
+                                currentTaskName = task,
+                                completedTaskCount = completed,
+                                totalTaskCount = if (total > 0) total else active.totalTaskCount,
+                            ),
+                        )
+                    } else {
+                        current
+                    }
+                }
+            }
+        }.onFailure { Timber.w(it, "syncProgressFromRemote parse failed: $jsonStr") }
     }
 
     /** null = 问不出来（没连上或调用失败），不能据此判定，只有明确的 false 才算数 */
@@ -497,7 +527,7 @@ class MaaFrameworkRunnerPort(
 
     private companion object {
         /** 对账间隔：Running / Stopping 期问，问一次是一次 binder 往返，不必更密 */
-        const val RECONCILE_INTERVAL_MS = 5_000L
+        const val RECONCILE_INTERVAL_MS = 1_500L
 
         /**
          * 一次否定读数之后的宽限

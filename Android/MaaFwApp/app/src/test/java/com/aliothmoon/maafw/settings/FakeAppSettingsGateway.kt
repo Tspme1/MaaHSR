@@ -143,4 +143,16 @@ class FakeAppSettingsGateway : AppSettingsGateway {
     override suspend fun setPipOnHome(enabled: Boolean) {
         pipOnHome.value = enabled
     }
+
+    override val muteTargetApp = MutableStateFlow(true)
+
+    override suspend fun setMuteTargetApp(enabled: Boolean) {
+        muteTargetApp.value = enabled
+    }
+
+    override val backgroundFpsLimit = MutableStateFlow(30)
+
+    override suspend fun setBackgroundFpsLimit(fps: Int) {
+        backgroundFpsLimit.value = fps
+    }
 }

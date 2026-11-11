@@ -7,20 +7,25 @@
             "HonorAlreadyOpen",
             "HonorOpenFromHud",
             "HonorOpenPhone",
-            "HonorFromPhone"
+            "HonorFromPhone",
+            "HonorClosePhoneAndClickHud"
         ]
     },
     "HonorOpenFromHud": {
         "desc": "在大世界点击右上角无名勋礼图标",
         "recognition": "TemplateMatch",
-        "template": "hud_honor.png",
+        "template": [
+            "hud_honor_mask.png",
+            "hud_honor.png"
+        ],
+        "green_mask": true,
         "roi": [
             840,
             10,
             75,
             75
         ],
-        "threshold": 0.7,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             876,
@@ -34,14 +39,18 @@
     "HonorOpenPhone": {
         "desc": "在大世界点击左上角手机图标",
         "recognition": "TemplateMatch",
-        "template": "hud_phone.png",
+        "template": [
+            "hud_phone_mask.png",
+            "hud_phone.png"
+        ],
+        "green_mask": true,
         "roi": [
             5,
             25,
             65,
             70
         ],
-        "threshold": 0.7,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             30,
@@ -49,7 +58,8 @@
         ],
         "post_delay": 800,
         "next": [
-            "HonorFromPhone"
+            "HonorFromPhone",
+            "HonorClosePhoneAndClickHud"
         ]
     },
     "HonorFromPhone": {
@@ -72,6 +82,47 @@
         "post_delay": 900,
         "next": [
             "HonorAlreadyOpen"
+        ]
+    },
+    "HonorClosePhoneAndClickHud": {
+        "desc": "若手机菜单中未出现无名勋礼磁贴，关闭手机菜单并退回大世界点击右上角HUD图标",
+        "recognition": "OCR",
+        "expected": [
+            "委托",
+            "指南",
+            "跃迁",
+            "角色"
+        ],
+        "roi": [
+            580,
+            250,
+            620,
+            450
+        ],
+        "action": "Click",
+        "target": [
+            1235,
+            42
+        ],
+        "post_delay": 800,
+        "next": [
+            "HonorOpenFromHud",
+            "HonorClickHudDirect"
+        ]
+    },
+    "HonorClickHudDirect": {
+        "desc": "直接点击右上角HUD无名勋礼坐标",
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [
+            876,
+            44
+        ],
+        "max_hit": 1,
+        "post_delay": 900,
+        "next": [
+            "HonorAlreadyOpen",
+            "HonorDoneClose"
         ]
     },
     "HonorAlreadyOpen": {
@@ -249,14 +300,20 @@
     "HonorExitPhone": {
         "desc": "关闭手机菜单退回大世界",
         "recognition": "TemplateMatch",
-        "template": "phone_close.png",
+        "template": [
+            "phone_close_mask.png",
+            "stage_close_dark_mask.png",
+            "phone_close.png",
+            "stage_close_dark.png"
+        ],
+        "green_mask": true,
         "roi": [
             1190,
             5,
             85,
             80
         ],
-        "threshold": 0.72,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             1235,

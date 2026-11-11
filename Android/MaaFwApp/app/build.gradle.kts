@@ -12,6 +12,10 @@ android {
     namespace = "com.aliothmoon.maafw"
 
     defaultConfig {
+        versionCode = 113
+        versionName = "v0.0.2"
+        buildConfigField("String", "MAFW_PROJECT_VERSION", "\"v0.0.2\"")
+        buildConfigField("String", "MAFW_APP_VERSION", "\"v0.0.2\"")
         externalNativeBuild {
             cmake {
                 arguments += "-DANDROID_STL=c++_shared"

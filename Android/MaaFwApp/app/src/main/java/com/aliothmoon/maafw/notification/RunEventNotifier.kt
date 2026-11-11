@@ -99,13 +99,11 @@ class RunEventNotifier(
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-        val avatarBitmap = BitmapFactory.decodeResource(appContext.resources, R.drawable.ic_notification_avatar)
         val notification = NotificationCompat.Builder(
             appContext,
             if (high) CHANNEL_HIGH else CHANNEL_DEFAULT,
         )
             .setSmallIcon(R.drawable.ic_notification_maahsr)
-            .setLargeIcon(avatarBitmap)
             .setContentTitle(title)
             .setContentText(text)
             // 失败清单可以很长，折叠成一行就看不出是哪几个任务挂了

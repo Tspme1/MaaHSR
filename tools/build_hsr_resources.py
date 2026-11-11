@@ -21,11 +21,13 @@ CROPS = [
     ("hud_phone.png", "manual_20261103_213153_191.png", (16, 40, 44, 80)),
     ("hud_guide.png", "manual_20261103_213153_191.png", (988, 22, 1024, 66)),
     ("hud_honor.png", "manual_20261103_213153_191.png", (854, 22, 898, 66)),
-    ("phone_close.png", "manual_20261103_213205_023.png", (1216, 22, 1256, 62)),
-    ("phone_mail.png", "manual_20261103_213205_023.png", (1215, 210, 1257, 248)),
-    ("phone_assignments.png", "manual_20261103_213205_023.png", (1082, 272, 1166, 352)),
+    ("phone_close.png", "manual_20261110_211931_037.png", (1216, 22, 1256, 62)),
+    ("phone_mail.png", "manual_20261110_211931_037.png", (1215, 210, 1257, 248)),
+    ("phone_mail_warm.png", "manual_20261103_213205_023.png", (1215, 210, 1257, 248)),
+    ("phone_mail_green.png", "2026.11.10-20.58.14.586_MailOpenPhone.png", (1215, 210, 1257, 248)),
+    ("phone_assignments.png", "manual_20261110_211931_037.png", (1082, 272, 1166, 352)),
     ("phone_honor.png", "manual_20261103_213205_023.png", (870, 486, 950, 566)),
-    ("phone_guide.png", "manual_20261103_213205_023.png", (762, 596, 834, 674)),
+    ("phone_guide.png", "manual_20261110_211931_037.png", (762, 596, 834, 674)),
     ("guide_tab_daily.png", "manual_20261103_213226_694.png", (150, 86, 226, 138)),
     ("guide_tab_survival.png", "manual_20261103_213431_834.png", (244, 86, 320, 138)),
     ("assignment_claim.png", "manual_20261103_213247_386.png", (864, 612, 1158, 660)),
@@ -64,6 +66,68 @@ def crop_templates():
             cropped.save(out_path, format="PNG")
             print(f"  + 裁剪完成: {out_name} {box} (尺寸: {cropped.size})")
     print("[OK] 所有模版切图完成！\n")
+
+
+def build_masked_white_icons():
+    import numpy as np
+
+    print(f"[*] 开始生成纯白/半透图标 green_mask 模板...")
+    TARGETS = [
+        ("phone_mail.png", "phone_mail_mask.png"),
+        ("hud_phone.png", "hud_phone_mask.png"),
+        ("hud_guide.png", "hud_guide_mask.png"),
+        ("hud_honor.png", "hud_honor_mask.png"),
+        ("phone_close.png", "phone_close_mask.png"),
+        ("stage_close_dark.png", "stage_close_dark_mask.png"),
+    ]
+
+    try:
+        from scipy.ndimage import maximum_filter
+        has_scipy = True
+    except ImportError:
+        has_scipy = False
+
+    def dilate_stroke_2px(stroke_mask):
+        if has_scipy:
+            return maximum_filter(maximum_filter(stroke_mask, size=3), size=3)
+        padded = np.pad(stroke_mask, 1, mode="edge")
+        res1 = np.zeros_like(stroke_mask)
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                res1 |= padded[1 + dy : 1 + dy + stroke_mask.shape[0], 1 + dx : 1 + dx + stroke_mask.shape[1]]
+        padded2 = np.pad(res1, 1, mode="edge")
+        res2 = np.zeros_like(stroke_mask)
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                res2 |= padded2[1 + dy : 1 + dy + stroke_mask.shape[0], 1 + dx : 1 + dx + stroke_mask.shape[1]]
+        return res2
+
+    for base_name, mask_name in TARGETS:
+        src_path = IMAGE_DIR / base_name
+        if not src_path.is_file():
+            print(f"[!] 警告：源图标不存在 {src_path}")
+            continue
+        with Image.open(src_path) as img:
+            arr = np.array(img.convert("RGB"))
+
+        R = arr[:, :, 0]
+        G = arr[:, :, 1]
+        B = arr[:, :, 2]
+        L = 0.299 * R + 0.587 * G + 0.114 * B
+        stroke = L >= 175
+        near_stroke = dilate_stroke_2px(stroke)
+        border = near_stroke & (~stroke)
+
+        out = np.zeros_like(arr)
+        out[:, :] = [0, 255, 0]  # MaaFramework green_mask (pure green ignored)
+        v = np.clip(L, 200, 255).astype(np.uint8)
+        out[stroke] = np.column_stack([v[stroke], v[stroke], v[stroke]])
+        out[border] = [55, 55, 55]
+
+        out_path = IMAGE_DIR / mask_name
+        Image.fromarray(out).save(out_path, format="PNG")
+        print(f"  + 遮罩生成完成: {mask_name} (高亮笔画: {int(np.sum(stroke))}, 边缘反差轮廓: {int(np.sum(border))})")
+    print("[OK] 所有纯白/半透遮罩模板生成完成！\n")
 
 
 def build_pipelines():
@@ -176,14 +240,18 @@ def build_pipelines():
         "CheckMainWorld": {
             "desc": "识别左上角手机图标确认位于大世界",
             "recognition": "TemplateMatch",
-            "template": "hud_phone.png",
+            "template": [
+                "hud_phone_mask.png",
+                "hud_phone.png"
+            ],
+            "green_mask": True,
             "roi": [
                 5,
                 25,
                 65,
                 70
             ],
-            "threshold": 0.72,
+            "threshold": 0.65,
             "action": "DoNothing",
             "pre_delay": 0,
             "post_delay": 0,
@@ -221,14 +289,18 @@ def build_pipelines():
         "ClickPhoneIcon": {
             "desc": "点击左上角手机图标",
             "recognition": "TemplateMatch",
-            "template": "hud_phone.png",
+            "template": [
+                "hud_phone_mask.png",
+                "hud_phone.png"
+            ],
+            "green_mask": True,
             "roi": [
                 5,
                 25,
                 65,
                 70
             ],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 30,
@@ -239,14 +311,20 @@ def build_pipelines():
         "CloseTopRightModal": {
             "desc": "点击右上角关闭按钮",
             "recognition": "TemplateMatch",
-            "template": "phone_close.png",
+            "template": [
+                "phone_close_mask.png",
+                "stage_close_dark_mask.png",
+                "phone_close.png",
+                "stage_close_dark.png"
+            ],
+            "green_mask": True,
             "roi": [
                 1190,
                 5,
                 85,
                 80
             ],
-            "threshold": 0.72,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 1235,
@@ -283,14 +361,18 @@ def build_pipelines():
         "AssignmentOpenPhone": {
             "desc": "在大世界点击左上角手机打开菜单",
             "recognition": "TemplateMatch",
-            "template": "hud_phone.png",
+            "template": [
+                "hud_phone_mask.png",
+                "hud_phone.png"
+            ],
+            "green_mask": True,
             "roi": [
                 5,
                 25,
                 65,
                 70
             ],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 30,
@@ -450,14 +532,20 @@ def build_pipelines():
         "AssignmentExitPhone": {
             "desc": "关闭手机菜单退回大世界",
             "recognition": "TemplateMatch",
-            "template": "phone_close.png",
+            "template": [
+                "phone_close_mask.png",
+                "stage_close_dark_mask.png",
+                "phone_close.png",
+                "stage_close_dark.png"
+            ],
+            "green_mask": True,
             "roi": [
                 1190,
                 5,
                 85,
                 80
             ],
-            "threshold": 0.72,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 1235,
@@ -494,6 +582,7 @@ def build_pipelines():
             "next": [
                 "MailAlreadyOpen",
                 "MailFromPhone",
+                "MailFromPhoneByAnchor",
                 "MailOpenPhone",
                 "MailReturnAndRetry"
             ]
@@ -501,14 +590,18 @@ def build_pipelines():
         "MailOpenPhone": {
             "desc": "在大世界点击左上角手机打开菜单",
             "recognition": "TemplateMatch",
-            "template": "hud_phone.png",
+            "template": [
+                "hud_phone_mask.png",
+                "hud_phone.png"
+            ],
+            "green_mask": True,
             "roi": [
                 5,
                 25,
                 65,
                 70
             ],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 30,
@@ -516,20 +609,56 @@ def build_pipelines():
             ],
             "post_delay": 800,
             "next": [
-                "MailFromPhone"
+                "MailFromPhone",
+                "MailFromPhoneByAnchor"
             ]
         },
         "MailFromPhone": {
             "desc": "从手机右侧栏点击邮件图标",
             "recognition": "TemplateMatch",
-            "template": "phone_mail.png",
+            "template": [
+                "phone_mail_mask.png",
+                "phone_mail.png",
+                "phone_mail_warm.png",
+                "phone_mail_green.png"
+            ],
+            "green_mask": True,
             "roi": [
                 1195,
                 190,
                 80,
                 80
             ],
-            "threshold": 0.7,
+            "threshold": 0.65,
+            "action": "Click",
+            "target": [
+                1236,
+                230
+            ],
+            "post_delay": 900,
+            "next": [
+                "MailAlreadyOpen"
+            ]
+        },
+        "MailFromPhoneByAnchor": {
+            "desc": "当背景变化导致邮箱图标模板未命中时，通过识别手机菜单文字锚点直接点击右侧固定邮箱坐标",
+            "recognition": "OCR",
+            "expected": [
+                "委托",
+                "指南",
+                "合成",
+                "成就",
+                "角色",
+                "跃迁",
+                "商店",
+                "好友"
+            ],
+            "roi": [
+                580,
+                250,
+                620,
+                450
+            ],
             "action": "Click",
             "target": [
                 1236,
@@ -627,14 +756,20 @@ def build_pipelines():
         "MailExitPhone": {
             "desc": "关闭手机菜单退回大世界",
             "recognition": "TemplateMatch",
-            "template": "phone_close.png",
+            "template": [
+                "phone_close_mask.png",
+                "stage_close_dark_mask.png",
+                "phone_close.png",
+                "stage_close_dark.png"
+            ],
+            "green_mask": True,
             "roi": [
                 1190,
                 5,
                 85,
                 80
             ],
-            "threshold": 0.72,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 1235,
@@ -655,7 +790,8 @@ def build_pipelines():
             "post_delay": 600,
             "next": [
                 "MailOpenPhone",
-                "MailFromPhone"
+                "MailFromPhone",
+                "MailFromPhoneByAnchor"
             ]
         }
     }
@@ -679,14 +815,18 @@ def build_pipelines():
         "DailyOpenFromHud": {
             "desc": "在大世界点击右上角指南图标",
             "recognition": "TemplateMatch",
-            "template": "hud_guide.png",
+            "template": [
+                "hud_guide_mask.png",
+                "hud_guide.png"
+            ],
+            "green_mask": True,
             "roi": [
                 970,
                 10,
                 80,
                 75
             ],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 1010,
@@ -701,14 +841,18 @@ def build_pipelines():
         "DailyOpenPhone": {
             "desc": "在大世界点击左上角手机图标",
             "recognition": "TemplateMatch",
-            "template": "hud_phone.png",
+            "template": [
+                "hud_phone_mask.png",
+                "hud_phone.png"
+            ],
+            "green_mask": True,
             "roi": [
                 5,
                 25,
                 65,
                 70
             ],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 30,
@@ -883,14 +1027,20 @@ def build_pipelines():
         "DailyExitPhone": {
             "desc": "若在手机菜单则关闭退出",
             "recognition": "TemplateMatch",
-            "template": "phone_close.png",
+            "template": [
+                "phone_close_mask.png",
+                "stage_close_dark_mask.png",
+                "phone_close.png",
+                "stage_close_dark.png"
+            ],
+            "green_mask": True,
             "roi": [
                 1190,
                 5,
                 85,
                 80
             ],
-            "threshold": 0.72,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 1235,
@@ -915,20 +1065,25 @@ def build_pipelines():
                 "HonorAlreadyOpen",
                 "HonorOpenFromHud",
                 "HonorOpenPhone",
-                "HonorFromPhone"
+                "HonorFromPhone",
+                "HonorClosePhoneAndClickHud"
             ]
         },
         "HonorOpenFromHud": {
             "desc": "在大世界点击右上角无名勋礼图标",
             "recognition": "TemplateMatch",
-            "template": "hud_honor.png",
+            "template": [
+                "hud_honor_mask.png",
+                "hud_honor.png"
+            ],
+            "green_mask": True,
             "roi": [
                 840,
                 10,
                 75,
                 75
             ],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 876,
@@ -942,14 +1097,18 @@ def build_pipelines():
         "HonorOpenPhone": {
             "desc": "在大世界点击左上角手机图标",
             "recognition": "TemplateMatch",
-            "template": "hud_phone.png",
+            "template": [
+                "hud_phone_mask.png",
+                "hud_phone.png"
+            ],
+            "green_mask": True,
             "roi": [
                 5,
                 25,
                 65,
                 70
             ],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 30,
@@ -957,7 +1116,8 @@ def build_pipelines():
             ],
             "post_delay": 800,
             "next": [
-                "HonorFromPhone"
+                "HonorFromPhone",
+                "HonorClosePhoneAndClickHud"
             ]
         },
         "HonorFromPhone": {
@@ -980,6 +1140,47 @@ def build_pipelines():
             "post_delay": 900,
             "next": [
                 "HonorAlreadyOpen"
+            ]
+        },
+        "HonorClosePhoneAndClickHud": {
+            "desc": "若手机菜单中未出现无名勋礼磁贴，关闭手机菜单并退回大世界点击右上角HUD图标",
+            "recognition": "OCR",
+            "expected": [
+                "委托",
+                "指南",
+                "跃迁",
+                "角色"
+            ],
+            "roi": [
+                580,
+                250,
+                620,
+                450
+            ],
+            "action": "Click",
+            "target": [
+                1235,
+                42
+            ],
+            "post_delay": 800,
+            "next": [
+                "HonorOpenFromHud",
+                "HonorClickHudDirect"
+            ]
+        },
+        "HonorClickHudDirect": {
+            "desc": "直接点击右上角HUD无名勋礼坐标",
+            "recognition": "DirectHit",
+            "action": "Click",
+            "target": [
+                876,
+                44
+            ],
+            "max_hit": 1,
+            "post_delay": 900,
+            "next": [
+                "HonorAlreadyOpen",
+                "HonorDoneClose"
             ]
         },
         "HonorAlreadyOpen": {
@@ -1157,14 +1358,20 @@ def build_pipelines():
         "HonorExitPhone": {
             "desc": "关闭手机菜单退回大世界",
             "recognition": "TemplateMatch",
-            "template": "phone_close.png",
+            "template": [
+                "phone_close_mask.png",
+                "stage_close_dark_mask.png",
+                "phone_close.png",
+                "stage_close_dark.png"
+            ],
+            "green_mask": True,
             "roi": [
                 1190,
                 5,
                 85,
                 80
             ],
-            "threshold": 0.72,
+            "threshold": 0.65,
             "action": "Click",
             "target": [
                 1235,
@@ -1197,9 +1404,13 @@ def build_pipelines():
         "PowerOpenGuideFromHud": {
             "desc": "在大世界点击右上角指南图标",
             "recognition": "TemplateMatch",
-            "template": "hud_guide.png",
+            "template": [
+                "hud_guide_mask.png",
+                "hud_guide.png"
+            ],
+            "green_mask": True,
             "roi": [970, 10, 80, 75],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [1010, 44],
             "post_delay": 800,
@@ -1211,9 +1422,13 @@ def build_pipelines():
         "PowerOpenPhone": {
             "desc": "在大世界点击左上角手机图标",
             "recognition": "TemplateMatch",
-            "template": "hud_phone.png",
+            "template": [
+                "hud_phone_mask.png",
+                "hud_phone.png"
+            ],
+            "green_mask": True,
             "roi": [5, 25, 65, 70],
-            "threshold": 0.7,
+            "threshold": 0.65,
             "action": "Click",
             "target": [30, 60],
             "post_delay": 700,
@@ -1708,9 +1923,12 @@ def build_pipelines():
             "desc": "若退关后停留在关卡详情页或指南页，点击右上角叉号关闭",
             "recognition": "TemplateMatch",
             "template": [
-                "stage_close_dark.png",
-                "phone_close.png"
+                "phone_close_mask.png",
+                "stage_close_dark_mask.png",
+                "phone_close.png",
+                "stage_close_dark.png"
             ],
+            "green_mask": True,
             "roi": [1190, 5, 85, 80],
             "threshold": 0.65,
             "action": "Click",
@@ -1749,9 +1967,12 @@ def build_pipelines():
             "desc": "若退关后仍有深色/浅色右上角叉号窗口，点击叉号关闭",
             "recognition": "TemplateMatch",
             "template": [
-                "stage_close_dark.png",
-                "phone_close.png"
+                "phone_close_mask.png",
+                "stage_close_dark_mask.png",
+                "phone_close.png",
+                "stage_close_dark.png"
             ],
+            "green_mask": True,
             "roi": [1190, 5, 85, 80],
             "threshold": 0.65,
             "action": "Click",
@@ -1810,9 +2031,9 @@ def update_interface_and_locales():
 
     # 读取旧 interface
     interface_data = json.loads(interface_path.read_text(encoding="utf-8"))
-    interface_data["version"] = "v0.0.1"
+    interface_data["version"] = "v0.0.2"
     interface_data["github"] = "https://github.com/Tspme1/MaaHSR"
-    interface_data["title"] = "MaaHSR v0.0.1"
+    interface_data["title"] = "MaaHSR v0.0.2"
 
     # 默认预设配置（新安装 APK 自动生成包含全部 6 项日常任务的默认配置）
     interface_data["preset"] = [
@@ -2204,13 +2425,72 @@ def update_interface_and_locales():
             },
             {
                 "name": "UseFirstFriendSupport",
-                "label": "使用好友第一位支援角色",
+                "label": "使用好友支援角色",
+                "option": [
+                    "SupportSlot"
+                ],
                 "pipeline_override": {
                     "PowerStageReady": {
                         "next": [
                             "PowerClickSupportBtn",
                             "PowerClickStartChallenge"
                         ]
+                    }
+                }
+            }
+        ]
+    }
+
+    interface_data["option"]["SupportSlot"] = {
+        "type": "select",
+        "label": "$option.support_slot.label",
+        "default_case": "Slot1",
+        "cases": [
+            {
+                "name": "Slot1",
+                "label": "第 1 位支援角色",
+                "pipeline_override": {
+                    "PowerSelectFirstSupport": {
+                        "target": [220, 190],
+                        "focus": {
+                            "Node.Recognition.Succeeded": "已选中第 1 位好友支援角色"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Slot2",
+                "label": "第 2 位支援角色",
+                "pipeline_override": {
+                    "PowerSelectFirstSupport": {
+                        "target": [220, 306],
+                        "focus": {
+                            "Node.Recognition.Succeeded": "已选中第 2 位好友支援角色"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Slot3",
+                "label": "第 3 位支援角色",
+                "pipeline_override": {
+                    "PowerSelectFirstSupport": {
+                        "target": [220, 422],
+                        "focus": {
+                            "Node.Recognition.Succeeded": "已选中第 3 位好友支援角色"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Slot4",
+                "label": "第 4 位支援角色",
+                "pipeline_override": {
+                    "PowerSelectFirstSupport": {
+                        "target": [220, 538],
+                        "focus": {
+                            "Node.Recognition.Succeeded": "已选中第 4 位好友支援角色"
+                        }
                     }
                 }
             }
@@ -2332,7 +2612,7 @@ def update_interface_and_locales():
     }
 
     interface_path.write_text(json.dumps(interface_data, ensure_ascii=False, indent=4), encoding="utf-8")
-    print(f"  + interface.json 已更新至 v0.0.1")
+    print(f"  + interface.json 已更新至 v0.0.2")
 
     # 更新 zh_cn.json（非必要括号全部删除，任务标题只保留每日实训括号并改为领取每日活跃度奖励）
     locales_data = json.loads(zh_cn_path.read_text(encoding="utf-8"))
@@ -2361,6 +2641,7 @@ def update_interface_and_locales():
         "option.custom_count_field.label": "输入刷取总次数",
         "option.custom_count_pattern.msg": "请输入大于 0 的正整数",
         "option.use_support.label": "是否使用支援角色",
+        "option.support_slot.label": "选择支援位序号",
         "option.use_fuel_voucher.label": "助燃券快速刷取"
     })
     zh_cn_path.write_text(json.dumps(locales_data, ensure_ascii=False, indent=4), encoding="utf-8")
@@ -2370,6 +2651,7 @@ def update_interface_and_locales():
 
 if __name__ == "__main__":
     crop_templates()
+    build_masked_white_icons()
     build_pipelines()
     update_interface_and_locales()
-    print("ALL DONE for MaaHSR v0.0.1 Resource Build!")
+    print("ALL DONE for MaaHSR v0.0.2 Resource Build!")

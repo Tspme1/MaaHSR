@@ -781,7 +781,7 @@
     <string name="notification_include_log_details">推送内容附带运行日志</string>
     <string name="notification_section_test">测试推送</string>
     <string name="notification_test_title">测试通知</string>
-    <string name="notification_test_message">这是一条来自 MaaFwApp 的测试通知</string>
+    <string name="notification_test_message">这是一条来自 MaaHSR 的测试通知</string>
 
     <!-- 推送渠道名 -->
     <string name="notification_provider_server_chan">Server 酱</string>

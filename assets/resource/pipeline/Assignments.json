@@ -13,14 +13,18 @@
     "AssignmentOpenPhone": {
         "desc": "在大世界点击左上角手机打开菜单",
         "recognition": "TemplateMatch",
-        "template": "hud_phone.png",
+        "template": [
+            "hud_phone_mask.png",
+            "hud_phone.png"
+        ],
+        "green_mask": true,
         "roi": [
             5,
             25,
             65,
             70
         ],
-        "threshold": 0.7,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             30,
@@ -180,14 +184,20 @@
     "AssignmentExitPhone": {
         "desc": "关闭手机菜单退回大世界",
         "recognition": "TemplateMatch",
-        "template": "phone_close.png",
+        "template": [
+            "phone_close_mask.png",
+            "stage_close_dark_mask.png",
+            "phone_close.png",
+            "stage_close_dark.png"
+        ],
+        "green_mask": true,
         "roi": [
             1190,
             5,
             85,
             80
         ],
-        "threshold": 0.72,
+        "threshold": 0.65,
         "action": "Click",
         "target": [
             1235,

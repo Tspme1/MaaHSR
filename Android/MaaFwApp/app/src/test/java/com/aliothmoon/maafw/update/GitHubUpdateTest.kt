@@ -74,7 +74,7 @@ class GitHubUpdateTest {
             ),
             client(gateway).check(checkRequest()),
         )
-        val url = gateway.requests.single().first.toHttpUrl()
+        val url = gateway.requests.first().first.toHttpUrl()
         assertEquals("/repos/maaxyz/example/releases", url.encodedPath)
         assertEquals("100", url.queryParameter("per_page"))
         assertEquals("1", url.queryParameter("page"))
@@ -110,10 +110,10 @@ class GitHubUpdateTest {
 
         client(gateway).check(checkRequest())
 
-        assertNull(gateway.requests.single().second["Authorization"])
-        assertEquals("2022-11-28", gateway.requests.single().second["X-GitHub-Api-Version"])
+        assertNull(gateway.requests.first().second["Authorization"])
+        assertEquals("2022-11-28", gateway.requests.first().second["X-GitHub-Api-Version"])
         // 非 MirrorChyan 的请求不暴露应用身份
-        assertEquals(MiscConstants.BROWSER_UA, gateway.requests.single().second["User-Agent"])
+        assertEquals(MiscConstants.BROWSER_UA, gateway.requests.first().second["User-Agent"])
     }
 
     @Test
@@ -481,6 +481,134 @@ class GitHubUpdateTest {
         assertEquals(
             UpdateResolveResult.Failed(UpdateSource.GITHUB, UpdateCheckFailure.NO_MATCHING_ASSET),
             client(RecordingHttpClientHelper(FakeHttpResponse(200, body)), mirror("v1.7.0")).resolve(resolveRequest()),
+        )
+    }
+
+    @Test
+    fun `extractVersionNotes extracts section for various tag formats and stops at separator`() {
+        val markdown = """
+            # Header
+
+            Intro text.
+
+            ---
+
+            ## [v0.0.2] - 2026-11-11
+
+            ### ✨ Features
+            - Feature 1
+            - Feature 2
+
+            ---
+
+            ## [v0.0.1] - 2026-11-05
+            - Old feature
+        """.trimIndent()
+
+        val api = api(RecordingHttpClientHelper())
+        assertEquals(
+            "### ✨ Features\n- Feature 1\n- Feature 2",
+            api.extractVersionNotes(markdown, "v0.0.2"),
+        )
+        assertEquals(
+            "### ✨ Features\n- Feature 1\n- Feature 2",
+            api.extractVersionNotes(markdown, "0.0.2"),
+        )
+        assertEquals(
+            "- Old feature",
+            api.extractVersionNotes(markdown, "v0.0.1"),
+        )
+        assertNull(api.extractVersionNotes(markdown, "v0.0.3"))
+    }
+
+    @Test
+    fun `extractVersionNotes handles heading without brackets or without separator`() {
+        val markdown = """
+            ## v1.2.0
+
+            Line 1
+            Line 2
+
+            ## v1.1.0
+            Older line
+        """.trimIndent()
+
+        val api = api(RecordingHttpClientHelper())
+        assertEquals("Line 1\nLine 2", api.extractVersionNotes(markdown, "v1.2.0"))
+        assertEquals("Line 1\nLine 2", api.extractVersionNotes(markdown, "1.2.0"))
+    }
+
+    @Test
+    fun `fetchChangelogSection fetches tag changelog first`() = runBlocking {
+        val changelog = """
+            ## [v1.5.0] - 2026-11-11
+            - Tag changelog notes
+            ---
+        """.trimIndent()
+        val gateway = RecordingHttpClientHelper(
+            FakeHttpResponse(200, changelog),
+        )
+
+        val api = api(gateway)
+        val notes = api.fetchChangelogSection("owner/repo", "v1.5.0")
+        assertEquals("- Tag changelog notes", notes)
+        assertEquals(
+            "https://raw.githubusercontent.com/owner/repo/v1.5.0/CHANGELOG.md",
+            gateway.requests.single().first,
+        )
+    }
+
+    @Test
+    fun `fetchChangelogSection falls back to main when tag changelog fails`() = runBlocking {
+        val changelog = """
+            ## [v1.5.0] - 2026-11-11
+            - Main branch notes
+            ---
+        """.trimIndent()
+        val gateway = RecordingHttpClientHelper(
+            FakeHttpResponse(404, "Not Found"),
+            FakeHttpResponse(200, changelog),
+        )
+
+        val api = api(gateway)
+        val notes = api.fetchChangelogSection("owner/repo", "v1.5.0")
+        assertEquals("- Main branch notes", notes)
+        assertEquals(2, gateway.requests.size)
+        assertEquals(
+            "https://raw.githubusercontent.com/owner/repo/v1.5.0/CHANGELOG.md",
+            gateway.requests[0].first,
+        )
+        assertEquals(
+            "https://raw.githubusercontent.com/owner/repo/main/CHANGELOG.md",
+            gateway.requests[1].first,
+        )
+    }
+
+    @Test
+    fun `check uses changelog section when available`() = runBlocking {
+        val changelog = """
+            ## [v1.5.0] - 2026-11-11
+            - Better notes from CHANGELOG
+            ---
+        """.trimIndent()
+        val gateway = RecordingHttpClientHelper(
+            FakeHttpResponse(
+                200,
+                releases(
+                    release(
+                        "v1.5.0",
+                        assets = assets(asset("app-arm64-v8a.apk")),
+                        body = "Old release body",
+                    ),
+                ),
+            ),
+            FakeHttpResponse(200, changelog),
+        )
+
+        val result = client(gateway).check(checkRequest())
+        assertEquals(
+            "- Better notes from CHANGELOG",
+            (result as UpdateCheckResult.UpdateAvailable).info.releaseNotes,
         )
     }
 

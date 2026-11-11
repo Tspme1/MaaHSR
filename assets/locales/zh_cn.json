@@ -32,5 +32,6 @@
     "option.assignment_action.label": "每日委托设置",
     "option.mail_action.label": "邮件领取设置",
     "option.daily_training_action.label": "每日实训设置",
-    "option.nameless_honor_action.label": "无名勋礼设置"
+    "option.nameless_honor_action.label": "无名勋礼设置",
+    "option.support_slot.label": "选择支援位序号"
 }

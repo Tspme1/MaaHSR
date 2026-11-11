@@ -54,8 +54,8 @@ class RunProgressSnapshotTest {
         assertFalse(snapshot.indeterminate)
         // (2 + 0.5) / 5 * 1000
         assertEquals(500, snapshot.progress)
-        assertEquals("2/5", snapshot.shortCriticalText)
-        assertEquals("2/5 · 作战 · 正在刷关", snapshot.contentText)
+        assertEquals("3/5", snapshot.shortCriticalText)
+        assertEquals("3/5 · 作战 · 正在刷关", snapshot.contentText)
     }
 
     @Test
@@ -73,7 +73,7 @@ class RunProgressSnapshotTest {
             execution = execution(done = 0, total = 3, currentTaskName = "StartUp"),
             statusText = null,
         )
-        assertEquals("0/3 · StartUp", snapshot.contentText)
+        assertEquals("1/3 · StartUp", snapshot.contentText)
     }
 
     @Test
@@ -87,7 +87,7 @@ class RunProgressSnapshotTest {
         assertFalse(snapshot.indeterminate)
         // (3 + 0.5) / 4 * 1000
         assertEquals(875, snapshot.progress)
-        assertEquals("3/4 · Mall", snapshot.contentText)
+        assertEquals("4/4 · Mall", snapshot.contentText)
     }
 
     @Test

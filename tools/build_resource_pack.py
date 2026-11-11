@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 ASSETS_DIR = ROOT_DIR / "assets"
 DIST_DIR = ROOT_DIR / "dist"
+RELEASE_DIR = ROOT_DIR / "release"
 
 
 def build_resource_pack(version: str = None, include_ocr: bool = False) -> Path:
@@ -29,10 +30,11 @@ def build_resource_pack(version: str = None, include_ocr: bool = False) -> Path:
         interface_path.write_text(json.dumps(meta, ensure_ascii=False, indent=4), encoding="utf-8")
         print(f"[+] 已同步 interface.json 版本号为: {version}")
     else:
-        version = meta.get("version", "v0.1.0")
+        version = meta.get("version", "v0.0.2")
 
+    RELEASE_DIR.mkdir(parents=True, exist_ok=True)
     DIST_DIR.mkdir(parents=True, exist_ok=True)
-    out_zip = DIST_DIR / f"MaaHSR-resource-{version}.zip"
+    out_zip = RELEASE_DIR / f"MaaHSR-resource-{version}.zip"
 
     count = 0
     with zipfile.ZipFile(out_zip, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
@@ -47,9 +49,14 @@ def build_resource_pack(version: str = None, include_ocr: bool = False) -> Path:
             zf.write(file_path, arcname=rel)
             count += 1
 
+    import shutil
+    dist_zip = DIST_DIR / f"MaaHSR-resource-{version}.zip"
+    shutil.copy2(out_zip, dist_zip)
+
     sha256_hex = hashlib.sha256(out_zip.read_bytes()).hexdigest()
     size_kb = out_zip.stat().st_size / 1024.0
     print(f"[OK] 资源热更新包构建完成: {out_zip}")
+    print(f"     同时同步镜像至: {dist_zip}")
     print(f"     包含文件数: {count} (已排除 18MB OCR 模型: {not include_ocr})")
     print(f"     包体大小  : {size_kb:.1f} KB")
     print(f"     SHA-256   : sha256:{sha256_hex}")

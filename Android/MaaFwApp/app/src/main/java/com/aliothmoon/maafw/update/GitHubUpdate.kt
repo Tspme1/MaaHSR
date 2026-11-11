@@ -103,6 +103,58 @@ internal class GitHubReleasesApi(
     fun releasesPageUrl(repository: String): String = "https://github.com/$repository/releases"
 
     /**
+     * 从仓库 CHANGELOG.md 提取指定 tag 的更新说明段落。
+     * 优先尝试对应 tag 分支/标签路径，失败时回退至 main 分支。
+     */
+    suspend fun fetchChangelogSection(repository: String, tag: String): String? {
+        val tagUrl = "https://raw.githubusercontent.com/$repository/$tag/CHANGELOG.md"
+        val mainUrl = "https://raw.githubusercontent.com/$repository/main/CHANGELOG.md"
+
+        suspend fun fetch(url: String): String? = runCatching {
+            val response = helper.get(url, headers = mapOf("User-Agent" to MiscConstants.BROWSER_UA))
+            if (response.code in 200..299) {
+                response.readBody()
+            } else {
+                null
+            }
+        }.getOrNull()?.takeIf(String::isNotBlank)
+
+        val tagContent = fetch(tagUrl)
+        val tagNotes = tagContent?.let { extractVersionNotes(it, tag) }
+        if (tagNotes != null) return tagNotes
+
+        val mainContent = fetch(mainUrl) ?: return null
+        return extractVersionNotes(mainContent, tag)
+    }
+
+    internal fun extractVersionNotes(markdown: String, tag: String): String? {
+        if (markdown.isBlank()) return null
+        val cleanTag = tag.removePrefix("v").removePrefix("V")
+        val escapedClean = Regex.escape(cleanTag)
+        val escapedTag = Regex.escape(tag)
+        val headingRegex = Regex(
+            """^##\s+(?:\[v?$escapedClean\]|\[$escapedTag\]|v?$escapedClean(?![0-9A-Za-z._-])|$escapedTag(?![0-9A-Za-z._-]))""",
+            RegexOption.IGNORE_CASE,
+        )
+
+        val lines = markdown.lines()
+        val startIndex = lines.indexOfFirst { headingRegex.containsMatchIn(it.trim()) }
+        if (startIndex < 0) return null
+
+        val extractedLines = mutableListOf<String>()
+        for (i in (startIndex + 1) until lines.size) {
+            val line = lines[i]
+            val trimmed = line.trim()
+            if (trimmed.startsWith("## ") || trimmed == "##" || trimmed.matches(Regex("""^---+${'$'}"""))) {
+                break
+            }
+            extractedLines.add(line)
+        }
+
+        return extractedLines.joinToString("\n").trim().takeIf(String::isNotBlank)
+    }
+
+    /**
      * 单 ABI 包先挑同 ABI 的变体（标记按优先级排），没拆到再回退 universal；
      * universal 包只挑 universal（不带任何 ABI 标记的单个 apk），不换成单 ABI 包。
      * 若该 Release 为纯资源热更新（仅上传了 `MaaHSR-resource-*.zip` / `pi.zip` 而无 APK），则选中资源压缩包进行应用内热更新。
@@ -254,9 +306,10 @@ internal class GitHubUpdateClient(
         if (version <= currentVersion) {
             UpdateCheckResult.UpToDate(source, release.tag)
         } else {
+            val notes = api.fetchChangelogSection(repository, release.tag)?.takeIf(String::isNotBlank) ?: release.body
             UpdateCheckResult.UpdateAvailable(
                 source,
-                UpdateInfo(version = release.tag, releaseNotesUrl = release.htmlUrl, releaseNotes = release.body),
+                UpdateInfo(version = release.tag, releaseNotesUrl = release.htmlUrl, releaseNotes = notes),
             )
         }
     } catch (e: CancellationException) {

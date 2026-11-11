@@ -44,8 +44,10 @@ object RunProgressSnapshots {
         val title = titleOf(phase)
         val total = execution?.totalTaskCount ?: 0
         val done = execution?.completedTaskCount?.coerceIn(0, total) ?: 0
+        val hasCurrentTask = !execution?.currentTaskName.isNullOrBlank()
+        val currentStep = if (hasCurrentTask && done < total) done + 1 else done
         val indeterminate = phase == RunnerPhase.Preparing || total <= 0
-        val progressLabel = "$done/$total".takeIf { total > 0 }
+        val progressLabel = "$currentStep/$total".takeIf { total > 0 }
         val taskLabel = execution?.currentTaskLabel
         val status = firstLine(statusText)?.takeIf { it != taskLabel && it != progressLabel }
         return RunProgressSnapshot(
@@ -59,7 +61,7 @@ object RunProgressSnapshots {
             progress = if (indeterminate) {
                 0
             } else {
-                progressValue(done, total, hasCurrentTask = !execution?.currentTaskName.isNullOrBlank())
+                progressValue(done, total, hasCurrentTask = hasCurrentTask)
             },
             indeterminate = indeterminate,
             barColor = BAR_COLOR,

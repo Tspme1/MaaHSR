@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import android.os.PowerManager
 import android.os.SystemClock
 import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
@@ -71,8 +72,9 @@ class RunForegroundService : Service() {
     private val xmsfGate: XmsfNetworkGate by inject()
     private val appScope: CoroutineScope by inject(named<AppCoroutineScope>())
 
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var observeJob: Job? = null
+    private var wakeLock: PowerManager.WakeLock? = null
 
     /** 通知刷新节流的上次落点；MaaFramework 的进度回调能一秒来好几条 */
     private var lastUpdateAt = 0L
@@ -122,12 +124,14 @@ class RunForegroundService : Service() {
 
     override fun onDestroy() {
         observeJob = null
+        releaseWakeLock()
         releaseIslandGate()
         serviceScope.cancel()
         super.onDestroy()
     }
 
     private fun observe() {
+        acquireWakeLock()
         if (observeJob?.isActive == true) return
         observeJob = serviceScope.launch {
             launch { observeProgress() }
@@ -135,8 +139,32 @@ class RunForegroundService : Service() {
         }
     }
 
+    private fun acquireWakeLock() {
+        if (wakeLock == null) {
+            val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager
+            wakeLock = pm?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MaaHSR:RunNotificationWakeLock")?.apply {
+                setReferenceCounted(false)
+            }
+        }
+        runCatching {
+            if (wakeLock?.isHeld != true) {
+                wakeLock?.acquire(3 * 60 * 60 * 1000L)
+            }
+        }.onFailure { Timber.w(it, "Failed to acquire wake lock") }
+    }
+
+    private fun releaseWakeLock() {
+        runCatching {
+            if (wakeLock?.isHeld == true) {
+                wakeLock?.release()
+            }
+        }.onFailure { Timber.w(it, "Failed to release wake lock") }
+    }
+
     private suspend fun observeProgress() {
         var lastPostedPhase: RunnerPhase? = null
+        var lastPostedTask: String? = null
+        var lastPostedDone: Int = -1
         // 展示方式与闸门也算输入：设置里换了方式、闸门拿到了，都要立刻重发一帧
         combine(
             runnerPort.state,
@@ -146,19 +174,30 @@ class RunForegroundService : Service() {
         ) { state, status, _, _ -> state to status }.collectLatest { (state, status) ->
             if (!state.phase.isBusy) {
                 lastPostedPhase = null
+                lastPostedTask = null
+                lastPostedDone = -1
                 stopNow()
                 return@collectLatest
             }
+            val currentTask = state.activeExecution?.currentTaskName
+            val currentDone = state.activeExecution?.completedTaskCount ?: -1
+            val sameStep = state.phase == lastPostedPhase &&
+                currentTask == lastPostedTask &&
+                currentDone == lastPostedDone
             val now = SystemClock.elapsedRealtime()
             val wait = MIN_UPDATE_INTERVAL_MS - (now - lastUpdateAt)
-            if (wait > 0 && state.phase == lastPostedPhase) delay(wait)
+            if (wait > 0 && sameStep) delay(wait)
             if (!runnerPort.state.value.phase.isBusy) {
                 lastPostedPhase = null
+                lastPostedTask = null
+                lastPostedDone = -1
                 stopNow()
                 return@collectLatest
             }
             lastUpdateAt = SystemClock.elapsedRealtime()
             lastPostedPhase = state.phase
+            lastPostedTask = currentTask
+            lastPostedDone = currentDone
             notify(buildNotification(state, status))
         }
     }
@@ -182,7 +221,6 @@ class RunForegroundService : Service() {
             ensureFocusChannel()
             val notification = NotificationCompat.Builder(this, FOCUS_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification_maahsr)
-                .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notification_avatar))
                 .setContentTitle(getString(R.string.notification_focus_title))
                 .setContentText(text)
                 // 模板正文可以很长，折叠成一行就没意义了
@@ -214,6 +252,7 @@ class RunForegroundService : Service() {
         FOCUS_NOTIFICATION_ID_BASE + (focusNotificationSeq++ % FOCUS_NOTIFICATION_ID_SLOTS)
 
     private fun stopNow() {
+        releaseWakeLock()
         stopForeground(STOP_FOREGROUND_REMOVE)
         releaseIslandGate()
         stopSelf()

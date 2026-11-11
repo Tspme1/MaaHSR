@@ -188,6 +188,11 @@ interface RemoteService {
     /** ?????????????PLAY_AUDIO ignore?????????????? */
     oneway void setMuteTargetApp(boolean enabled) = 86;
 
-    /** ???????????????FPS?? 15/20/30/60? */
+    /** 目标应用后台帧率限制；FPS 档位 15/20/30/60 等 */
     oneway void setBackgroundFpsLimit(int fps) = 87;
+
+    /**
+     * 运行进度快照 JSON，格式：{"running":true,"index":0,"completed":0,"total":5,"task":"StartUp"}
+     */
+    String getRunProgressJson() = 88;
 }
